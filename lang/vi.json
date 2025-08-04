@@ -262,5 +262,16 @@
     "Your email address is unverified.": "Địa chỉ email của bạn chưa được xác minh.",
     "Don't have an account?": "Bạn chưa có tài khoản?",
     "Or log in with": "Hoặc đăng nhập bằng",
-    "Once your account is deleted, all of its resources and data will be permanently deleted.": "Khi tài khoản của bạn bị xóa, tất cả tài nguyên và dữ liệu của tài khoản đó sẽ bị xóa vĩnh viễn."
+    "Once your account is deleted, all of its resources and data will be permanently deleted.": "Khi tài khoản của bạn bị xóa, tất cả tài nguyên và dữ liệu của tài khoản đó sẽ bị xóa vĩnh viễn.",
+    "Overview": "Tổng quan",
+    "Management": "Quản lý",
+    "Books": "Sách",
+    "Categories": "Danh mục",
+    "Authors": "Tác giả",
+    "Orders": "Đơn hàng",
+    "Customers": "Khách hàng",
+    "Reports": "Báo cáo",
+    "Statistics": "Thống kê",
+    "System": "Hệ thống",
+    "Permissions": "Phân quyền"
 }
