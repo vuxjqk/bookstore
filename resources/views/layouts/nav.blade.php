@@ -34,7 +34,8 @@
             <i class="fas fa-book mr-3"></i>
             {{ __('Books') }}
         </a>
-        <a href="{{ route('dashboard.index') }}" class="{{ request()->routeIs('categories.*') ? $active : $inactive }}">
+        <a href="{{ route('categories.index') }}"
+            class="{{ request()->routeIs('categories.*') ? $active : $inactive }}">
             <i class="fas fa-list mr-3"></i>
             {{ __('Categories') }}
         </a>
