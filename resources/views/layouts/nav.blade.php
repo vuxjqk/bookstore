@@ -39,9 +39,19 @@
             <i class="fas fa-list mr-3"></i>
             {{ __('Categories') }}
         </a>
-        <a href="{{ route('dashboard.index') }}" class="{{ request()->routeIs('authors.*') ? $active : $inactive }}">
+        <a href="{{ route('authors.index') }}" class="{{ request()->routeIs('authors.*') ? $active : $inactive }}">
             <i class="fas fa-user-edit mr-3"></i>
             {{ __('Authors') }}
+        </a>
+        <a href="{{ route('publishers.index') }}"
+            class="{{ request()->routeIs('publishers.*') ? $active : $inactive }}">
+            <i class="fas fa-building mr-3"></i>
+            {{ __('Publishers') }}
+        </a>
+        <a href="{{ route('suppliers.index') }}"
+            class="{{ request()->routeIs('suppliers.*') ? $active : $inactive }}">
+            <i class="fas fa-university mr-3"></i>
+            {{ __('Suppliers') }}
         </a>
         <a href="{{ route('dashboard.index') }}" class="{{ request()->routeIs('orders.*') ? $active : $inactive }}">
             <i class="fas fa-shopping-cart mr-3"></i>
