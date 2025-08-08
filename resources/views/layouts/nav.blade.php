@@ -30,7 +30,7 @@
         <div class="px-6 py-3 mt-4">
             <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wide">{{ __('Management') }}</h2>
         </div>
-        <a href="{{ route('dashboard.index') }}" class="{{ request()->routeIs('books.*') ? $active : $inactive }}">
+        <a href="{{ route('books.index') }}" class="{{ request()->routeIs('books.*') ? $active : $inactive }}">
             <i class="fas fa-book mr-3"></i>
             {{ __('Books') }}
         </a>

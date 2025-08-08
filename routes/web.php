@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\AuthorController;
+use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
@@ -34,6 +35,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         route::resource('authors', AuthorController::class);
         route::resource('publishers', PublisherController::class);
         route::resource('suppliers', SupplierController::class);
+        Route::get('/books/export', [BookController::class, 'export'])->name('books.export');
+        route::resource('books', BookController::class);
     });
 });
 

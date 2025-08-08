@@ -94,7 +94,7 @@ class PublisherController extends Controller
                 ? __('Cannot delete because it is in use.')
                 : __('An error occurred while deleting: ') . $e->getMessage();
 
-            return redirect()->back()->with('success', $msg);
+            return redirect()->back()->with('error', $msg);
         }
     }
 }
