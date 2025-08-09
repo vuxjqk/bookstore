@@ -57,7 +57,7 @@
                                     {{ __('Title') }} <span class="text-red-500">*</span>
                                 </label>
                                 <input type="text" name="title" id="title"
-                                    value="{{ old('title', $book->title) }}" required
+                                    value="{{ old('title', $book->title) }}"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     placeholder="{{ __('Enter book title') }}">
                                 @error('title')
@@ -71,7 +71,6 @@
                                     {{ __('Slug') }} <span class="text-red-500">*</span>
                                 </label>
                                 <input type="text" name="slug" id="slug" value="{{ old('slug', $book->slug) }}"
-                                    required
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     placeholder="{{ __('Enter book slug') }}">
                                 @error('slug')
@@ -345,7 +344,7 @@
                             <div class="space-y-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2" for="original_price">
-                                        {{ __('Original Price') }}
+                                        {{ __('Original Price') }} <span class="text-red-500">*</span>
                                     </label>
                                     <div class="relative">
                                         <input type="number" name="original_price" id="original_price"
@@ -361,7 +360,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2" for="sale_price">
-                                        {{ __('Sale Price') }}
+                                        {{ __('Sale Price') }} <span class="text-red-500">*</span>
                                     </label>
                                     <div class="relative">
                                         <input type="number" name="sale_price" id="sale_price"
@@ -380,7 +379,7 @@
                             <!-- Stock -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2" for="stock_quantity">
-                                    {{ __('Stock Quantity') }}
+                                    {{ __('Stock Quantity') }} <span class="text-red-500">*</span>
                                 </label>
                                 <input type="number" name="stock_quantity" id="stock_quantity"
                                     value="{{ old('stock_quantity', $book->stock_quantity) }}" min="0"

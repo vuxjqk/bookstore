@@ -2,23 +2,20 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
     <title>@yield('title', 'Admin Panel')</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet">
 
-    <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"
-        integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Styles -->
+    @vite(['resources/css/app.css'])
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer">
 
     <style>
         .sidebar-transition {
@@ -35,47 +32,50 @@
     </style>
 </head>
 
-<body class="bg-gray-100">
+<body class="bg-gray-100 font-figtree antialiased">
     @include('layouts.nav')
 
     <!-- Main Content -->
     <div class="lg:ml-64 content-transition">
         @include('layouts.header')
-
         <div class="h-[calc(100vh-72px)] overflow-y-auto scrollbar-hidden">
             @yield('content')
         </div>
     </div>
 
-    <!-- Backdrop for mobile -->
-    <div id="backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"></div>
+    <!-- Backdrop for Mobile -->
+    <div id="backdrop" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden"></div>
 
-    <!-- Unified Toast -->
+    <!-- Toast Notification -->
     <div id="toast"
-        class="fixed top-4 right-4 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform flex items-center space-x-2">
+        class="fixed top-4 right-4 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform flex items-center gap-2">
         <i id="toastIcon" class="fas"></i>
-        <span id="toastMessage">...</span>
+        <span id="toastMessage"></span>
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div id="deleteModal" class="fixed inset-0 bg-gray-600/50 hidden flex items-center justify-center z-50">
         <div class="bg-white rounded-lg p-6 w-full max-w-md">
             <h2 class="text-xl font-bold text-gray-800 mb-4">{{ __('Confirm deletion') }}</h2>
-            <p class="text-gray-600 mb-6">{{ __('Are you sure you want to delete? This action cannot be undone.') }}
-            </p>
-            <div class="flex justify-end space-x-2">
+            <p class="text-gray-600 mb-6">{{ __('Are you sure you want to delete? This action cannot be undone.') }}</p>
+            <div class="flex justify-end gap-2">
                 <button onclick="closeDeleteModal()"
-                    class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg">{{ __('Cancel') }}</button>
-                <form id="deleteForm" method="POST" action="">
+                    class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg">
+                    {{ __('Cancel') }}
+                </button>
+                <form id="deleteForm" method="POST">
                     @csrf
                     @method('DELETE')
-                    <button id="confirmDelete"
-                        class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg">{{ __('Delete') }}</button>
+                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg">
+                        {{ __('Delete') }}
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 
+    <!-- Scripts -->
+    @vite(['resources/js/app.js'])
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // Sidebar functionality

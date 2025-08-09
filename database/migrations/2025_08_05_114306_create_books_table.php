@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('isbn', 50)->nullable()->unique();
             $table->string('language', 50)->nullable();
             $table->text('description')->nullable();
-            $table->unsignedInteger('pages')->default(0);
+            $table->unsignedInteger('pages')->nullable();
             $table->string('dimensions', 50)->nullable();
             $table->unsignedInteger('weight')->nullable();
             $table->year('publication_year')->nullable();
@@ -28,7 +28,7 @@ return new class extends Migration
             $table->decimal('original_price', 15, 2)->default(0.00);
             $table->decimal('sale_price', 15, 2)->default(0.00);
             $table->unsignedInteger('stock_quantity')->default(0);
-            $table->enum('status', ['available', 'out_of_stock', 'pre_order', 'discontinued'])->nullable();
+            $table->enum('status', ['available', 'out_of_stock', 'pre_order', 'discontinued'])->default('available');
             $table->timestamps();
         });
     }

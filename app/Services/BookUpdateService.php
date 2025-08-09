@@ -36,16 +36,16 @@ class BookUpdateService
     protected function rulesPriceStock()
     {
         return [
-            'original_price' => 'nullable|numeric|min:0',
-            'sale_price' => 'nullable|numeric|min:0',
-            'stock_quantity' => 'nullable|integer|min:0',
+            'original_price' => 'required|numeric|min:0',
+            'sale_price' => 'required|numeric|min:0',
+            'stock_quantity' => 'required|integer|min:0',
         ];
     }
 
     protected function rulesStatus()
     {
         return [
-            'status' => 'nullable|in:available,out_of_stock,pre_order,discontinued',
+            'status' => 'required|in:available,out_of_stock,pre_order,discontinued',
         ];
     }
 
@@ -69,10 +69,7 @@ class BookUpdateService
 
     protected function validated(Request $request, array $rules)
     {
-        return array_filter(
-            $request->validate($rules),
-            fn($v) => !is_null($v)
-        );
+        return $request->validate($rules);
     }
 
     protected function handleImagesUpdate(Request $request, Book $book, array $validated)

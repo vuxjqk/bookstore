@@ -36,11 +36,11 @@ class BookController extends Controller
             'status' => $request->input('status'),
         ];
 
-        $categories = Category::all();
         $books = Book::filter($filters)->latest()->paginate(10)->appends($request->query());
+        $categories = Category::all();
         $statuses = $this->bookAttributes->getStatuses();
 
-        return view('books.index', compact('books', 'categories', 'filters', 'statuses'));
+        return view('books.index', compact('books', 'categories', 'statuses'));
     }
 
     /**
@@ -129,10 +129,10 @@ class BookController extends Controller
      */
     public function show(Book $book)
     {
+        $book->load(['author', 'publisher', 'categories', 'images']);
         $coverTypes = $this->bookAttributes->getCoverTypes();
         $statuses = $this->bookAttributes->getStatuses();
 
-        $book->load(['author', 'publisher', 'categories', 'images']);
         return view('books.show', compact('book', 'coverTypes', 'statuses'));
     }
 

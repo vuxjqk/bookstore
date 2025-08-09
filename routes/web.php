@@ -16,6 +16,7 @@ Route::get('/', function () {
 });
 
 Route::get('/home', [HomeController::class, 'index'])->name('home.index');
+Route::get('/home/{book:slug}', [HomeController::class, 'show'])->name('home.show');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -35,8 +36,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         route::resource('authors', AuthorController::class);
         route::resource('publishers', PublisherController::class);
         route::resource('suppliers', SupplierController::class);
-        Route::get('/books/export', [BookController::class, 'export'])->name('books.export');
         route::resource('books', BookController::class);
+        Route::get('/books-export', [BookController::class, 'export'])->name('books.export');
+
+        route::resource('settings', BookController::class);
+        route::resource('orders', BookController::class);
+        route::resource('customers', BookController::class);
+        route::resource('statistics', BookController::class);
+        route::resource('reports', BookController::class);
+        route::resource('system', BookController::class);
+        route::resource('permissions', BookController::class);
     });
 });
 
