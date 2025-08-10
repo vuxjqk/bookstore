@@ -1,117 +1,15 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@extends('layouts.customer')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'BookStore')</title>
+@section('title', __('Book Details'))
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet">
-
-    <!-- Styles -->
-    @vite(['resources/css/app.css'])
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer">
-
-    <style>
-        .rating-stars {
-            color: #fbbf24;
-        }
-
-        .book-image-gallery .thumbnail:hover {
-            transform: scale(1.05);
-            transition: transform 0.2s ease;
-        }
-
-        .book-image-gallery .thumbnail.active {
-            border-color: #3b82f6;
-            border-width: 2px;
-        }
-
-        .fade-in {
-            animation: fadeIn 0.3s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-    </style>
-</head>
-
-<body class="bg-gray-100 font-figtree antialiased">
-    <!-- Header -->
-    <header class="bg-white shadow-md sticky top-0 z-50">
-        <div class="container mx-auto px-4 py-3">
-            <div class="flex items-center justify-between">
-                <!-- Logo -->
-                <div class="flex items-center space-x-2">
-                    <i class="fas fa-book text-3xl text-blue-600"></i>
-                    <span class="text-2xl font-bold text-gray-800">BookStore</span>
-                </div>
-
-                <!-- Search Bar -->
-                <div class="hidden md:flex flex-1 max-w-lg mx-8">
-                    <div class="relative w-full">
-                        <input type="text" placeholder="Tìm kiếm sách..."
-                            class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-                    </div>
-                </div>
-
-                <!-- Navigation -->
-                <nav class="flex items-center space-x-6">
-                    <a href="#" class="text-gray-700 hover:text-blue-600 transition duration-200">
-                        <i class="fas fa-heart text-lg"></i>
-                        <span class="ml-1 hidden sm:inline">Yêu thích</span>
-                    </a>
-                    <a href="#" class="text-gray-700 hover:text-blue-600 transition duration-200 relative">
-                        <i class="fas fa-shopping-cart text-lg"></i>
-                        <span class="ml-1 hidden sm:inline">Giỏ hàng</span>
-                        <span
-                            class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
-                    </a>
-                    <a href="#" class="text-gray-700 hover:text-blue-600 transition duration-200">
-                        <i class="fas fa-user text-lg"></i>
-                        <span class="ml-1 hidden sm:inline">Tài khoản</span>
-                    </a>
-                </nav>
-            </div>
-        </div>
-
-        <!-- Navigation Menu -->
-        <div class="bg-blue-600 text-white">
-            <div class="container mx-auto px-4">
-                <nav class="flex space-x-8 py-3">
-                    <a href="#" class="hover:text-blue-200 transition duration-200">Trang chủ</a>
-                    <a href="#" class="hover:text-blue-200 transition duration-200">Tiểu thuyết</a>
-                    <a href="#" class="hover:text-blue-200 transition duration-200">Sách thiếu nhi</a>
-                    <a href="#" class="hover:text-blue-200 transition duration-200">Sách giáo khoa</a>
-                    <a href="#" class="hover:text-blue-200 transition duration-200">Sách ngoại ngữ</a>
-                    <a href="#" class="hover:text-blue-200 transition duration-200">Khuyến mãi</a>
-                </nav>
-            </div>
-        </div>
-    </header>
-
+@section('content')
     <!-- Breadcrumb -->
     <div class="bg-white border-b">
         <div class="container mx-auto px-4 py-3">
             <nav class="text-sm text-gray-600">
-                <a href="#" class="hover:text-blue-600">Trang chủ</a>
+                <a href="{{ url('/') }}" class="hover:text-blue-600">{{ __('Home') }}</a>
                 <span class="mx-2">/</span>
-                <a href="#" class="hover:text-blue-600">{{ $book['category'] }}</a>
-                <span class="mx-2">/</span>
-                <span class="text-gray-800">{{ $book['title'] }}</span>
+                <span class="text-gray-800">{{ $book->title }}</span>
             </nav>
         </div>
     </div>
@@ -124,33 +22,35 @@
                 <div class="book-image-gallery">
                     <!-- Main Image -->
                     <div class="mb-4">
-                        <img id="main-image" src="{{ $book['images'][0] }}" alt="{{ $book['title'] }}"
-                            class="w-full max-w-md mx-auto rounded-lg shadow-md fade-in">
+                        @if ($book->images->first())
+                            <img id="main-image" src="{{ asset('storage/' . $book->images->first()->image_path) }}"
+                                alt="{{ $book['title'] }}" class="w-full max-w-md mx-auto rounded-lg shadow-md fade-in">
+                        @endif
                     </div>
 
                     <!-- Thumbnail Images -->
                     <div class="flex space-x-2 justify-center">
-                        @foreach ($book['images'] as $index => $image)
-                            <img src="{{ $image }}" alt="Hình {{ $index + 1 }}"
+                        @foreach ($book->images as $index => $image)
+                            <img src="{{ asset('storage/' . $image->image_path) }}" alt="{{ $image->alt_text }}"
                                 class="thumbnail w-16 h-20 object-cover rounded border cursor-pointer {{ $index === 0 ? 'active' : '' }}"
-                                onclick="changeMainImage('{{ $image }}', this)">
+                                onclick="changeMainImage('{{ asset('storage/' . $image->image_path) }}', this)">
                         @endforeach
                     </div>
                 </div>
 
                 <!-- Product Information -->
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-800 mb-4">{{ $book['title'] }}</h1>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-4">{{ $book->title }}</h1>
 
                     <!-- Author and Publisher -->
                     <div class="mb-4">
                         <p class="text-lg text-gray-600 mb-1">
                             <i class="fas fa-user-edit mr-2"></i>
-                            Tác giả: <span class="font-semibold text-blue-600">{{ $book['author'] }}</span>
+                            Tác giả: <span class="font-semibold text-blue-600">{{ $book->author->name ?? 'N/A' }}</span>
                         </p>
                         <p class="text-lg text-gray-600">
                             <i class="fas fa-building mr-2"></i>
-                            Nhà xuất bản: <span class="font-semibold">{{ $book['publisher'] }}</span>
+                            Nhà xuất bản: <span class="font-semibold">{{ $book->publisher->name ?? 'N/A' }}</span>
                         </p>
                     </div>
 
@@ -199,15 +99,13 @@
                         <div class="flex items-center space-x-4 mb-4">
                             <label class="text-gray-700 font-semibold">Số lượng:</label>
                             <div class="flex items-center border border-gray-300 rounded">
-                                <button onclick="decreaseQuantity()"
-                                    class="px-3 py-2 text-gray-600 hover:bg-gray-100">
+                                <button onclick="decreaseQuantity()" class="px-3 py-2 text-gray-600 hover:bg-gray-100">
                                     <i class="fas fa-minus"></i>
                                 </button>
                                 <input type="number" id="quantity" value="1" min="1"
                                     max="{{ $book['stock_quantity'] }}"
                                     class="w-16 text-center py-2 border-none focus:ring-0">
-                                <button onclick="increaseQuantity()"
-                                    class="px-3 py-2 text-gray-600 hover:bg-gray-100">
+                                <button onclick="increaseQuantity()" class="px-3 py-2 text-gray-600 hover:bg-gray-100">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
@@ -215,8 +113,8 @@
 
                         <!-- Action Buttons -->
                         <div class="flex space-x-4 mb-4">
-                            <button onclick="addToCart()"
-                                class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition duration-200">
+                            <button data-id="{{ $book->id }}"
+                                class="add-to-cart-btn flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition duration-200">
                                 <i class="fas fa-shopping-cart mr-2"></i>
                                 Thêm vào giỏ hàng
                             </button>
@@ -382,202 +280,161 @@
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white mt-12">
-        <div class="container mx-auto px-4 py-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div>
-                    <div class="flex items-center space-x-2 mb-4">
-                        <i class="fas fa-book text-2xl text-blue-400"></i>
-                        <span class="text-xl font-bold">BookStore</span>
-                    </div>
-                    <p class="text-gray-300">Cửa hàng sách trực tuyến uy tín với hàng ngàn đầu sách chất lượng.</p>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold mb-4">Liên kết nhanh</h3>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-300 hover:text-white">Về chúng tôi</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white">Chính sách đổi trả</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white">Hướng dẫn mua hàng</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white">Liên hệ</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold mb-4">Danh mục</h3>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-300 hover:text-white">Tiểu thuyết</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white">Sách thiếu nhi</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white">Sách giáo khoa</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white">Sách ngoại ngữ</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold mb-4">Liên hệ</h3>
-                    <div class="space-y-2">
-                        <p class="text-gray-300"><i class="fas fa-phone mr-2"></i>1900 1234</p>
-                        <p class="text-gray-300"><i class="fas fa-envelope mr-2"></i>info@bookstore.com</p>
-                        <p class="text-gray-300"><i class="fas fa-map-marker-alt mr-2"></i>123 Đường ABC, TP.HCM</p>
-                    </div>
-                </div>
-            </div>
-            <div class="border-t border-gray-700 mt-8 pt-8 text-center">
-                <p class="text-gray-300">&copy; 2024 BookStore. Tất cả quyền được bảo lưu.</p>
-            </div>
-        </div>
-    </footer>
+    @push('scripts')
+        <script>
+            // Image gallery functionality
+            function changeMainImage(imageSrc, thumbnail) {
+                document.getElementById('main-image').src = imageSrc;
+                document.getElementById('main-image').classList.add('fade-in');
 
-    <script>
-        // Image gallery functionality
-        function changeMainImage(imageSrc, thumbnail) {
-            document.getElementById('main-image').src = imageSrc;
-            document.getElementById('main-image').classList.add('fade-in');
+                // Remove active class from all thumbnails
+                document.querySelectorAll('.thumbnail').forEach(thumb => {
+                    thumb.classList.remove('active');
+                });
 
-            // Remove active class from all thumbnails
-            document.querySelectorAll('.thumbnail').forEach(thumb => {
-                thumb.classList.remove('active');
-            });
+                // Add active class to clicked thumbnail
+                thumbnail.classList.add('active');
 
-            // Add active class to clicked thumbnail
-            thumbnail.classList.add('active');
-
-            // Remove fade-in class after animation
-            setTimeout(() => {
-                document.getElementById('main-image').classList.remove('fade-in');
-            }, 300);
-        }
-
-        // Quantity controls
-        function increaseQuantity() {
-            const quantityInput = document.getElementById('quantity');
-            const currentValue = parseInt(quantityInput.value);
-            const maxValue = parseInt(quantityInput.max);
-
-            if (currentValue < maxValue) {
-                quantityInput.value = currentValue + 1;
-            }
-        }
-
-        function decreaseQuantity() {
-            const quantityInput = document.getElementById('quantity');
-            const currentValue = parseInt(quantityInput.value);
-
-            if (currentValue > 1) {
-                quantityInput.value = currentValue - 1;
-            }
-        }
-
-        // Tab functionality
-        function switchTab(tabName) {
-            // Hide all tab contents
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.add('hidden');
-            });
-
-            // Remove active styles from all tab buttons
-            document.querySelectorAll('.tab-button').forEach(button => {
-                button.classList.remove('border-blue-600', 'text-blue-600');
-                button.classList.add('border-transparent', 'text-gray-500');
-            });
-
-            // Show selected tab content
-            document.getElementById(tabName + '-tab').classList.remove('hidden');
-
-            // Add active styles to clicked tab button
-            event.target.classList.remove('border-transparent', 'text-gray-500');
-            event.target.classList.add('border-blue-600', 'text-blue-600');
-        }
-
-        // Cart functionality
-        function addToCart() {
-            const quantity = document.getElementById('quantity').value;
-
-            // Simulate API call
-            showNotification('Đã thêm ' + quantity + ' sản phẩm vào giỏ hàng!', 'success');
-
-            // Update cart count in header
-            const cartCount = document.querySelector('.fa-shopping-cart').nextElementSibling.nextElementSibling;
-            const currentCount = parseInt(cartCount.textContent);
-            cartCount.textContent = currentCount + parseInt(quantity);
-        }
-
-        function buyNow() {
-            const quantity = document.getElementById('quantity').value;
-            showNotification('Chuyển đến trang thanh toán với ' + quantity + ' sản phẩm...', 'info');
-
-            // Simulate redirect to checkout
-            setTimeout(() => {
-                showNotification('Tính năng đang được phát triển!', 'warning');
-            }, 1500);
-        }
-
-        // Wishlist functionality
-        function toggleWishlist() {
-            const wishlistBtn = document.getElementById('wishlist-btn');
-            const icon = wishlistBtn.querySelector('i');
-
-            if (icon.classList.contains('far')) {
-                // Add to wishlist
-                icon.classList.remove('far');
-                icon.classList.add('fas');
-                wishlistBtn.classList.add('text-red-500', 'border-red-500');
-                wishlistBtn.classList.remove('text-gray-700', 'border-gray-300');
-                wishlistBtn.innerHTML = '<i class="fas fa-heart mr-2"></i>Đã thêm vào yêu thích';
-                showNotification('Đã thêm vào danh sách yêu thích!', 'success');
-            } else {
-                // Remove from wishlist
-                icon.classList.remove('fas');
-                icon.classList.add('far');
-                wishlistBtn.classList.remove('text-red-500', 'border-red-500');
-                wishlistBtn.classList.add('text-gray-700', 'border-gray-300');
-                wishlistBtn.innerHTML = '<i class="far fa-heart mr-2"></i>Thêm vào yêu thích';
-                showNotification('Đã xóa khỏi danh sách yêu thích!', 'info');
-            }
-        }
-
-        // Review functionality
-        function showReviewForm() {
-            showNotification('Tính năng viết đánh giá đang được phát triển!', 'info');
-        }
-
-        // Related products
-        function viewProduct(productId) {
-            showNotification('Chuyển đến sản phẩm #' + productId + '...', 'info');
-            // Simulate navigation
-            setTimeout(() => {
-                showNotification('Tính năng đang được phát triển!', 'warning');
-            }, 1000);
-        }
-
-        // Notification system
-        function showNotification(message, type = 'info') {
-            // Remove existing notification
-            const existingNotification = document.getElementById('notification');
-            if (existingNotification) {
-                existingNotification.remove();
+                // Remove fade-in class after animation
+                setTimeout(() => {
+                    document.getElementById('main-image').classList.remove('fade-in');
+                }, 300);
             }
 
-            // Create notification element
-            const notification = document.createElement('div');
-            notification.id = 'notification';
-            notification.className =
-                `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg text-white font-semibold max-w-sm transform transition-all duration-300 translate-x-full`;
+            // Quantity controls
+            function increaseQuantity() {
+                const quantityInput = document.getElementById('quantity');
+                const currentValue = parseInt(quantityInput.value);
+                const maxValue = parseInt(quantityInput.max);
 
-            // Set color based on type
-            switch (type) {
-                case 'success':
-                    notification.classList.add('bg-green-500');
-                    break;
-                case 'error':
-                    notification.classList.add('bg-red-500');
-                    break;
-                case 'warning':
-                    notification.classList.add('bg-yellow-500');
-                    break;
-                default:
-                    notification.classList.add('bg-blue-500');
+                if (currentValue < maxValue) {
+                    quantityInput.value = currentValue + 1;
+                }
             }
 
-            notification.innerHTML = `
+            function decreaseQuantity() {
+                const quantityInput = document.getElementById('quantity');
+                const currentValue = parseInt(quantityInput.value);
+
+                if (currentValue > 1) {
+                    quantityInput.value = currentValue - 1;
+                }
+            }
+
+            // Tab functionality
+            function switchTab(tabName) {
+                // Hide all tab contents
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.add('hidden');
+                });
+
+                // Remove active styles from all tab buttons
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    button.classList.remove('border-blue-600', 'text-blue-600');
+                    button.classList.add('border-transparent', 'text-gray-500');
+                });
+
+                // Show selected tab content
+                document.getElementById(tabName + '-tab').classList.remove('hidden');
+
+                // Add active styles to clicked tab button
+                event.target.classList.remove('border-transparent', 'text-gray-500');
+                event.target.classList.add('border-blue-600', 'text-blue-600');
+            }
+
+            // Cart functionality
+            function addToCart() {
+                const quantity = document.getElementById('quantity').value;
+
+                // Simulate API call
+                showNotification('Đã thêm ' + quantity + ' sản phẩm vào giỏ hàng!', 'success');
+
+                // Update cart count in header
+                const cartCount = document.querySelector('.fa-shopping-cart').nextElementSibling.nextElementSibling;
+                const currentCount = parseInt(cartCount.textContent);
+                cartCount.textContent = currentCount + parseInt(quantity);
+
+                //???
+            }
+
+            function buyNow() {
+                const quantity = document.getElementById('quantity').value;
+                showNotification('Chuyển đến trang thanh toán với ' + quantity + ' sản phẩm...', 'info');
+
+                // Simulate redirect to checkout
+                setTimeout(() => {
+                    showNotification('Tính năng đang được phát triển!', 'warning');
+                }, 1500);
+            }
+
+            // Wishlist functionality
+            function toggleWishlist() {
+                const wishlistBtn = document.getElementById('wishlist-btn');
+                const icon = wishlistBtn.querySelector('i');
+
+                if (icon.classList.contains('far')) {
+                    // Add to wishlist
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                    wishlistBtn.classList.add('text-red-500', 'border-red-500');
+                    wishlistBtn.classList.remove('text-gray-700', 'border-gray-300');
+                    wishlistBtn.innerHTML = '<i class="fas fa-heart mr-2"></i>Đã thêm vào yêu thích';
+                    showNotification('Đã thêm vào danh sách yêu thích!', 'success');
+                } else {
+                    // Remove from wishlist
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                    wishlistBtn.classList.remove('text-red-500', 'border-red-500');
+                    wishlistBtn.classList.add('text-gray-700', 'border-gray-300');
+                    wishlistBtn.innerHTML = '<i class="far fa-heart mr-2"></i>Thêm vào yêu thích';
+                    showNotification('Đã xóa khỏi danh sách yêu thích!', 'info');
+                }
+            }
+
+            // Review functionality
+            function showReviewForm() {
+                showNotification('Tính năng viết đánh giá đang được phát triển!', 'info');
+            }
+
+            // Related products
+            function viewProduct(productId) {
+                showNotification('Chuyển đến sản phẩm #' + productId + '...', 'info');
+                // Simulate navigation
+                setTimeout(() => {
+                    showNotification('Tính năng đang được phát triển!', 'warning');
+                }, 1000);
+            }
+
+            // Notification system
+            function showNotification(message, type = 'info') {
+                // Remove existing notification
+                const existingNotification = document.getElementById('notification');
+                if (existingNotification) {
+                    existingNotification.remove();
+                }
+
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.id = 'notification';
+                notification.className =
+                    `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg text-white font-semibold max-w-sm transform transition-all duration-300 translate-x-full`;
+
+                // Set color based on type
+                switch (type) {
+                    case 'success':
+                        notification.classList.add('bg-green-500');
+                        break;
+                    case 'error':
+                        notification.classList.add('bg-red-500');
+                        break;
+                    case 'warning':
+                        notification.classList.add('bg-yellow-500');
+                        break;
+                    default:
+                        notification.classList.add('bg-blue-500');
+                }
+
+                notification.innerHTML = `
                 <div class="flex items-center justify-between">
                     <span>${message}</span>
                     <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
@@ -586,102 +443,101 @@
                 </div>
             `;
 
-            // Add to page
-            document.body.appendChild(notification);
+                // Add to page
+                document.body.appendChild(notification);
 
-            // Animate in
-            setTimeout(() => {
-                notification.classList.remove('translate-x-full');
-            }, 100);
+                // Animate in
+                setTimeout(() => {
+                    notification.classList.remove('translate-x-full');
+                }, 100);
 
-            // Auto remove after 5 seconds
-            setTimeout(() => {
-                if (notification.parentElement) {
-                    notification.classList.add('translate-x-full');
-                    setTimeout(() => {
-                        if (notification.parentElement) {
-                            notification.remove();
-                        }
-                    }, 300);
-                }
-            }, 5000);
-        }
-
-        // Mobile menu toggle (if needed)
-        function toggleMobileMenu() {
-            const mobileMenu = document.getElementById('mobile-menu');
-            if (mobileMenu) {
-                mobileMenu.classList.toggle('hidden');
+                // Auto remove after 5 seconds
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.classList.add('translate-x-full');
+                        setTimeout(() => {
+                            if (notification.parentElement) {
+                                notification.remove();
+                            }
+                        }, 300);
+                    }
+                }, 5000);
             }
-        }
 
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set first tab as active by default
-            switchTab('description');
+            // Mobile menu toggle (if needed)
+            function toggleMobileMenu() {
+                const mobileMenu = document.getElementById('mobile-menu');
+                if (mobileMenu) {
+                    mobileMenu.classList.toggle('hidden');
+                }
+            }
 
-            // Add smooth scrolling for anchor links
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const target = document.querySelector(this.getAttribute('href'));
-                    if (target) {
-                        target.scrollIntoView({
-                            behavior: 'smooth'
-                        });
+            // Initialize page
+            document.addEventListener('DOMContentLoaded', function() {
+                // Set first tab as active by default
+                switchTab('description');
+
+                // Add smooth scrolling for anchor links
+                document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                    anchor.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const target = document.querySelector(this.getAttribute('href'));
+                        if (target) {
+                            target.scrollIntoView({
+                                behavior: 'smooth'
+                            });
+                        }
+                    });
+                });
+
+                // Add quantity input validation
+                const quantityInput = document.getElementById('quantity');
+                quantityInput.addEventListener('change', function() {
+                    const value = parseInt(this.value);
+                    const min = parseInt(this.min);
+                    const max = parseInt(this.max);
+
+                    if (value < min) {
+                        this.value = min;
+                    } else if (value > max) {
+                        this.value = max;
+                        showNotification('Số lượng tối đa là ' + max + ' sản phẩm!', 'warning');
                     }
                 });
-            });
 
-            // Add quantity input validation
-            const quantityInput = document.getElementById('quantity');
-            quantityInput.addEventListener('change', function() {
-                const value = parseInt(this.value);
-                const min = parseInt(this.min);
-                const max = parseInt(this.max);
-
-                if (value < min) {
-                    this.value = min;
-                } else if (value > max) {
-                    this.value = max;
-                    showNotification('Số lượng tối đa là ' + max + ' sản phẩm!', 'warning');
+                // Add search functionality
+                const searchInput = document.querySelector('input[placeholder="Tìm kiếm sách..."]');
+                if (searchInput) {
+                    searchInput.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            const searchTerm = this.value.trim();
+                            if (searchTerm) {
+                                showNotification('Tìm kiếm: "' + searchTerm + '"...', 'info');
+                                setTimeout(() => {
+                                    showNotification('Tính năng tìm kiếm đang được phát triển!',
+                                        'warning');
+                                }, 1000);
+                            }
+                        }
+                    });
                 }
             });
 
-            // Add search functionality
-            const searchInput = document.querySelector('input[placeholder="Tìm kiếm sách..."]');
-            if (searchInput) {
-                searchInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        const searchTerm = this.value.trim();
-                        if (searchTerm) {
-                            showNotification('Tìm kiếm: "' + searchTerm + '"...', 'info');
-                            setTimeout(() => {
-                                showNotification('Tính năng tìm kiếm đang được phát triển!',
-                                    'warning');
-                            }, 1000);
-                        }
-                    }
-                });
+            // Add to cart animation
+            function animateAddToCart() {
+                const addToCartBtn = document.querySelector('button[onclick="addToCart()"]');
+                addToCartBtn.classList.add('scale-95');
+                setTimeout(() => {
+                    addToCartBtn.classList.remove('scale-95');
+                }, 150);
             }
-        });
 
-        // Add to cart animation
-        function animateAddToCart() {
-            const addToCartBtn = document.querySelector('button[onclick="addToCart()"]');
-            addToCartBtn.classList.add('scale-95');
-            setTimeout(() => {
-                addToCartBtn.classList.remove('scale-95');
-            }, 150);
-        }
-
-        // Update addToCart function to include animation
-        const originalAddToCart = addToCart;
-        addToCart = function() {
-            animateAddToCart();
-            originalAddToCart();
-        };
-    </script>
-</body>
-
-</html>
+            // Update addToCart function to include animation
+            // const originalAddToCart = addToCart;
+            // addToCart = function() {
+            //     animateAddToCart();
+            //     originalAddToCart();
+            // };
+        </script>
+    @endpush
+@endsection

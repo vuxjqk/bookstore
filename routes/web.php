@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\BookController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
@@ -17,6 +18,14 @@ Route::get('/', function () {
 
 Route::get('/home', [HomeController::class, 'index'])->name('home.index');
 Route::get('/home/{book:slug}', [HomeController::class, 'show'])->name('home.show');
+
+Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
+Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
+Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+Route::get('/cart/payment', [CartController::class, 'payment'])->name('cart.payment');
+Route::get('/cart/success', [CartController::class, 'success'])->name('cart.success');
 
 Route::get('/dashboard', function () {
     return view('dashboard');

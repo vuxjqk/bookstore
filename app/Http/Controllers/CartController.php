@@ -8,23 +8,11 @@ use Illuminate\Support\Facades\Validator;
 
 class CartController extends Controller
 {
-    /**
-     * Display the cart contents.
-     *
-     * @return \Illuminate\View\View
-     */
     public function index()
     {
-        $cart = session('cart', []);
-        return view('cart.index', compact('cart'));
+        return view('cart.index', ['cart' => session('cart', [])]);
     }
 
-    /**
-     * Add a book to the cart.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function add(Request $request)
     {
         $cart = session('cart', []);
@@ -37,14 +25,17 @@ class CartController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => __($validator->errors()->first()),
-                'cart' => array_values($cart),
+                'cart' => $cart,
             ], 422);
         }
 
         $bookId = $request->input('book_id');
         $quantity = $request->input('quantity');
-        $book = Book::with(['images', 'author'])
-            ->select('id', 'title', 'sale_price', 'stock_quantity')
+        $book = Book::select('id', 'author_id', 'title', 'sale_price', 'stock_quantity')
+            ->with([
+                'author:id,name',
+                'images:id,book_id,image_path,alt_text',
+            ])
             ->findOrFail($bookId);
 
         $newQuantity = isset($cart[$bookId]) ? $cart[$bookId]['quantity'] + $quantity : $quantity;
@@ -53,16 +44,16 @@ class CartController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => __('Insufficient stock quantity!'),
-                'cart' => array_values($cart),
+                'cart' => $cart,
             ], 400);
         }
 
-        $imagePath = $book->images->first()->image_path ?? '';
-
+        $image = $book->images->first();
         $cart[$bookId] = [
             'title' => $book->title,
             'author' => $book->author->name ?? '',
-            'image' => $imagePath,
+            'image' => $image?->image_path,
+            'alt' => $image?->alt_text,
             'unit_price' => $book->sale_price,
             'quantity' => $newQuantity,
             'amount' => $book->sale_price * $newQuantity,
@@ -73,16 +64,10 @@ class CartController extends Controller
         return response()->json([
             'success' => true,
             'message' => __('Book added to cart successfully!'),
-            'cart' => array_values($cart),
+            'cart' => $cart,
         ]);
     }
 
-    /**
-     * Update the quantity of a book in the cart.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function update(Request $request)
     {
         $cart = session('cart', []);
@@ -95,7 +80,7 @@ class CartController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => __($validator->errors()->first()),
-                'cart' => array_values($cart),
+                'cart' => $cart,
             ], 422);
         }
 
@@ -106,7 +91,7 @@ class CartController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => __('Book not found in cart!'),
-                'cart' => array_values($cart),
+                'cart' => $cart,
             ], 404);
         }
 
@@ -116,7 +101,7 @@ class CartController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => __('Insufficient stock quantity!'),
-                'cart' => array_values($cart),
+                'cart' => $cart,
             ], 400);
         }
 
@@ -127,56 +112,45 @@ class CartController extends Controller
         return response()->json([
             'success' => true,
             'message' => __('Cart updated successfully!'),
-            'cart' => array_values($cart),
+            'cart' => $cart,
         ]);
     }
 
-    /**
-     * Remove a book from the cart.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function remove(Request $request)
     {
         $cart = session('cart', []);
         $validator = Validator::make($request->all(), [
-            'book_id' => 'required',
+            'book_id' => 'required|exists:books,id',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'message' => __($validator->errors()->first()),
-                'cart' => array_values($cart),
+                'cart' => $cart,
             ], 422);
         }
 
         $bookId = $request->input('book_id');
 
-        if (isset($cart[$bookId])) {
-            unset($cart[$bookId]);
-            session()->put('cart', $cart);
-
+        if (!isset($cart[$bookId])) {
             return response()->json([
-                'success' => true,
-                'message' => __('Book removed from cart successfully!'),
-                'cart' => array_values($cart),
-            ]);
+                'success' => false,
+                'message' => __('Book not found in cart!'),
+                'cart' => $cart,
+            ], 404);
         }
 
+        unset($cart[$bookId]);
+        session()->put('cart', $cart);
+
         return response()->json([
-            'success' => false,
-            'message' => __('Book not found in cart!'),
-            'cart' => array_values($cart),
-        ], 404);
+            'success' => true,
+            'message' => __('Book removed from cart successfully!'),
+            'cart' => $cart,
+        ]);
     }
 
-    /**
-     * Clear the entire cart.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function clear()
     {
         session()->forget('cart');
@@ -188,24 +162,19 @@ class CartController extends Controller
         ]);
     }
 
-    /**
-     * Display the payment page.
-     *
-     * @return \Illuminate\View\View
-     */
     public function payment()
     {
         $cart = session('cart', []);
-        return view('cart.payment', compact('cart'));
+        if (empty($cart)) {
+            return redirect()->route('cart.index')->with('error', __('Your cart is empty.'));
+        }
+
+        return view('cart.payment', ['cart' => $cart]);
     }
 
-    /**
-     * Display the payment success page.
-     *
-     * @return \Illuminate\View\View
-     */
     public function success()
     {
+        session()->forget('cart');
         return view('cart.success');
     }
 }
