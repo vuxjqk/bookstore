@@ -33,6 +33,15 @@
 </head>
 
 <body class="bg-gray-100 font-figtree antialiased">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="flex gap-2">
+            <span class="w-3 h-3 bg-blue-600 rounded-full animate-bounce"></span>
+            <span class="w-3 h-3 bg-blue-600 rounded-full animate-bounce [animation-delay:-.3s]"></span>
+            <span class="w-3 h-3 bg-blue-600 rounded-full animate-bounce [animation-delay:-.6s]"></span>
+        </div>
+    </div>
+
     @include('layouts.nav')
 
     <!-- Main Content -->
@@ -77,6 +86,10 @@
     <!-- Scripts -->
     @vite(['resources/js/app.js'])
     <script>
+        window.addEventListener('load', function() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        });
+
         document.addEventListener('DOMContentLoaded', () => {
             // Sidebar functionality
             const sidebar = document.getElementById('sidebar');

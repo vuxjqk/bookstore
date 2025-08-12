@@ -62,7 +62,7 @@
                                         aria-label="{{ __('Increase quantity') }}">+</button>
                                 </div>
                                 <div class="text-lg font-semibold text-gray-800 text-right w-24">
-                                    {{ number_format($item['amount'], 0, ',', '.') }}₫
+                                    {{ number_format($item['subtotal'], 0, ',', '.') }}₫
                                 </div>
                                 <button class="remove-btn text-gray-500 hover:text-red-600 transition-colors"
                                     data-id="{{ $bookId }}" aria-label="{{ __('Remove item') }}">
@@ -90,7 +90,7 @@
                         </div>
                         <div class="flex justify-between text-gray-600">
                             <span>{{ __('Subtotal') }}</span>
-                            <span>{{ number_format(collect($cart)->sum('amount'), 0, ',', '.') }}₫</span>
+                            <span>{{ number_format(collect($cart)->sum('subtotal'), 0, ',', '.') }}₫</span>
                         </div>
                         <div class="flex justify-between text-gray-600">
                             <span>{{ __('Shipping Fee') }}</span>
@@ -99,7 +99,7 @@
                         <div class="border-t border-gray-200 pt-4">
                             <div class="flex justify-between text-gray-800 font-semibold">
                                 <span>{{ __('Total') }}</span>
-                                <span>{{ number_format(collect($cart)->sum('amount') + 30000, 0, ',', '.') }}₫</span>
+                                <span>{{ number_format(collect($cart)->sum('subtotal') + 30000, 0, ',', '.') }}₫</span>
                             </div>
                         </div>
                         <a href="{{ route('cart.payment') }}"
@@ -119,7 +119,7 @@
                 const cartItems = document.getElementById('cartItems');
                 const clearCart = document.getElementById('clear-cart');
 
-                cartItems.addEventListener('click', e => {
+                cartItems.addEventListener('click', async (e) => {
                     const btn = e.target.closest('.quantity-btn, .remove-btn');
                     if (!btn) return;
 
@@ -127,11 +127,14 @@
                     if (!bookId) return;
 
                     if (btn.classList.contains('remove-btn')) {
-                        if (!confirm('{{ __('Are you sure you want to delete this product from cart?') }}'))
-                            return;
-                        sendRequest('{{ route('cart.remove') }}', 'POST', {
-                            book_id: bookId
-                        });
+                        const result = await openConfirmModal(
+                            '{{ __('Are you sure you want to delete this product from cart?') }}');
+
+                        if (result) {
+                            sendRequest('{{ route('cart.remove') }}', 'POST', {
+                                book_id: bookId
+                            });
+                        }
                         return;
                     }
 
@@ -164,9 +167,13 @@
                 });
 
                 if (clearCart) {
-                    clearCart.addEventListener('click', () => {
-                        if (!confirm('{{ __('Are you sure you want to clear your cart?') }}')) return;
-                        sendRequest('{{ route('cart.clear') }}', 'POST', {});
+                    clearCart.addEventListener('click', async () => {
+                        const result = await openConfirmModal(
+                            '{{ __('Are you sure you want to clear your cart?') }}');
+
+                        if (result) {
+                            sendRequest('{{ route('cart.clear') }}', 'POST', {});
+                        }
                     });
                 }
             });

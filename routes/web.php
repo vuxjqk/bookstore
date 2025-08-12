@@ -7,6 +7,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublisherController;
 use App\Http\Controllers\SupplierController;
@@ -26,6 +27,7 @@ Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remov
 Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 Route::get('/cart/payment', [CartController::class, 'payment'])->name('cart.payment');
 Route::get('/cart/success', [CartController::class, 'success'])->name('cart.success');
+Route::post('/orders/store', [OrderController::class, 'store'])->name('orders.store');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -41,20 +43,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::middleware(['role:admin'])->group(function () {
         Route::get('dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index');
-        route::resource('categories', CategoryController::class);
-        route::resource('authors', AuthorController::class);
-        route::resource('publishers', PublisherController::class);
-        route::resource('suppliers', SupplierController::class);
-        route::resource('books', BookController::class);
+        Route::resource('categories', CategoryController::class);
+        Route::resource('authors', AuthorController::class);
+        Route::resource('publishers', PublisherController::class);
+        Route::resource('suppliers', SupplierController::class);
+        Route::resource('books', BookController::class);
         Route::get('/books-export', [BookController::class, 'export'])->name('books.export');
 
-        route::resource('settings', BookController::class);
-        route::resource('orders', BookController::class);
-        route::resource('customers', BookController::class);
-        route::resource('statistics', BookController::class);
-        route::resource('reports', BookController::class);
-        route::resource('system', BookController::class);
-        route::resource('permissions', BookController::class);
+        Route::get('/orders/index', [OrderController::class, 'index'])->name('orders.index');
+        Route::resource('settings', BookController::class);
+        Route::resource('customers', BookController::class);
+        Route::resource('statistics', BookController::class);
+        Route::resource('reports', BookController::class);
+        Route::resource('system', BookController::class);
+        Route::resource('permissions', BookController::class);
     });
 });
 

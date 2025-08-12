@@ -56,7 +56,7 @@ class CartController extends Controller
             'alt' => $image?->alt_text,
             'unit_price' => $book->sale_price,
             'quantity' => $newQuantity,
-            'amount' => $book->sale_price * $newQuantity,
+            'subtotal' => $book->sale_price * $newQuantity,
         ];
 
         session()->put('cart', $cart);
@@ -106,7 +106,7 @@ class CartController extends Controller
         }
 
         $cart[$bookId]['quantity'] = $quantity;
-        $cart[$bookId]['amount'] = $quantity * $cart[$bookId]['unit_price'];
+        $cart[$bookId]['subtotal'] = $quantity * $cart[$bookId]['unit_price'];
         session()->put('cart', $cart);
 
         return response()->json([

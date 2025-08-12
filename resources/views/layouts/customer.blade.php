@@ -74,6 +74,15 @@
 </head>
 
 <body class="bg-gray-100 font-figtree antialiased">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="flex gap-2">
+            <span class="w-3 h-3 bg-blue-600 rounded-full animate-bounce"></span>
+            <span class="w-3 h-3 bg-blue-600 rounded-full animate-bounce [animation-delay:-.3s]"></span>
+            <span class="w-3 h-3 bg-blue-600 rounded-full animate-bounce [animation-delay:-.6s]"></span>
+        </div>
+    </div>
+
     <!-- Header -->
     <header class="bg-white shadow-md sticky top-0 z-10">
         <div class="container mx-auto px-4 py-3">
@@ -241,9 +250,29 @@
         <span id="toastMessage"></span>
     </div>
 
+    <!-- Confirmation Modal -->
+    <div id="modal" class="fixed inset-0 bg-gray-600/50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">{{ __('Confirm') }}</h2>
+            <p id="confirmMessage" class="text-gray-600 mb-6"></p>
+            <div class="flex justify-end gap-2">
+                <button id="cancelBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg">
+                    {{ __('Cancel') }}
+                </button>
+                <button id="confirmBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg">
+                    {{ __('Confirm') }}
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     @vite(['resources/js/app.js'])
     <script>
+        window.addEventListener('load', function() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        });
+
         document.addEventListener('DOMContentLoaded', () => {
             // Prevent default for placeholder links
             document.querySelectorAll('a[href="#"]').forEach(link => {
@@ -344,6 +373,29 @@
             @if (session('error'))
                 showToast("{{ session('error') }}", "error");
             @endif
+
+            // Modal
+            window.openConfirmModal = (message) => {
+                return new Promise((resolve) => {
+                    const modal = document.getElementById('modal');
+                    const msg = document.getElementById('confirmMessage');
+                    const confirmBtn = document.getElementById('confirmBtn');
+                    const cancelBtn = document.getElementById('cancelBtn');
+
+                    msg.textContent = message;
+                    modal.classList.remove('hidden');
+
+                    confirmBtn.onclick = () => {
+                        modal.classList.add('hidden');
+                        resolve(true);
+                    };
+
+                    cancelBtn.onclick = () => {
+                        modal.classList.add('hidden');
+                        resolve(false);
+                    };
+                });
+            };
 
             // Generic AJAX Request
             let isLoading = false;
