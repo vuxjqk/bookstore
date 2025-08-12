@@ -18,6 +18,7 @@ Route::get('/', function () {
 });
 
 Route::get('/home', [HomeController::class, 'index'])->name('home.index');
+Route::get('/home/autocomplete', [HomeController::class, 'autocomplete'])->name('home.autocomplete');
 Route::get('/home/{book:slug}', [HomeController::class, 'show'])->name('home.show');
 
 Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');

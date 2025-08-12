@@ -17,6 +17,11 @@
         integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
         crossorigin="anonymous" referrerpolicy="no-referrer">
 
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
     <style>
         .rating-stars {
             color: #fbbf24;
@@ -103,15 +108,17 @@
 
                 <!-- Search Container -->
                 <div id="search-container"
-                    class="flex items-center bg-white px-2 py-2 transition-all duration-300 w-10 md:w-60">
+                    class="flex items-center bg-white px-2 py-2 transition-all duration-300 w-10 md:flex-grow md:mx-4">
                     <button id="search-toggle" class="md:hidden text-gray-700 hover:text-blue-600 focus:outline-none"
                         aria-label="{{ __('Toggle search') }}">
                         <i class="fas fa-search text-2xl"></i>
                     </button>
                     <div id="search-input"
                         class="relative w-0 md:w-full hidden md:block transition-[width] duration-300">
-                        <input type="search" placeholder="{{ __('Search books...') }}"
-                            class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <input type="search" id="book-search" name="search" value="{{ request('search') }}"
+                            placeholder="{{ __('Search books...') }}"
+                            class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            aria-label="{{ __('Search') }}">
                         <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                     </div>
                 </div>
@@ -174,7 +181,8 @@
             <a href="#" class="hover:text-blue-200 transition-colors py-2">{{ __('Novels') }}</a>
             <a href="#" class="hover:text-blue-200 transition-colors py-2">{{ __('Children Books') }}</a>
             <a href="#" class="hover:text-blue-200 transition-colors py-2">{{ __('Textbooks') }}</a>
-            <a href="#" class="hover:text-blue-200 transition-colors py-2">{{ __('Foreign Language Books') }}</a>
+            <a href="#"
+                class="hover:text-blue-200 transition-colors py-2">{{ __('Foreign Language Books') }}</a>
             <a href="#" class="hover:text-blue-200 transition-colors py-2">{{ __('Promotions') }}</a>
         </nav>
     </div>
@@ -269,7 +277,7 @@
     <!-- Scripts -->
     @vite(['resources/js/app.js'])
     <script>
-        window.addEventListener('load', function() {
+        window.addEventListener('load', () => {
             document.getElementById('loadingOverlay').classList.add('hidden');
         });
 
@@ -328,6 +336,24 @@
             });
 
             searchContainer.addEventListener('click', e => e.stopPropagation());
+
+            // Debounce window resize
+            let resizeTimer;
+            const mdBreakpoint = 768;
+
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    if (window.innerWidth >= mdBreakpoint) {
+                        if (!overlay.classList.contains('hidden')) {
+                            toggleSidebar();
+                        }
+                        if (!searchInput.classList.contains('hidden')) {
+                            toggleSearch();
+                        }
+                    }
+                }, 200);
+            });
 
             // Toast notification
             const showToast = (message, type = 'success') => {
@@ -439,6 +465,22 @@
                         quantity
                     });
                 });
+            });
+        });
+
+        // Autocomplete book search
+        $(document).ready(function() {
+            $('#book-search').autocomplete({
+                source: "{{ route('home.autocomplete') }}",
+                minLength: 1,
+                select: function(event, ui) {
+                    $('#book-search').val(ui.item.value);
+                    window.location.href = "{{ route('home.show', ['book' => '__ID__']) }}"
+                        .replace('__ID__', ui.item.id);
+                },
+                open: function(event, ui) {
+                    $('.ui-autocomplete').css('width', $('#book-search').outerWidth());
+                }
             });
         });
     </script>

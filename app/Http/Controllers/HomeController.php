@@ -20,6 +20,23 @@ class HomeController extends Controller
         return view('home.index');
     }
 
+    public function autocomplete(Request $request)
+    {
+        $term = $request->query('term');
+        $books = Book::where('title', 'like', '%' . $term . '%')
+            ->select('slug', 'title')
+            ->take(5)
+            ->get()
+            ->map(function ($book) {
+                return [
+                    'id' => $book->slug,
+                    'label' => $book->title,
+                    'value' => $book->title,
+                ];
+            });
+        return response()->json($books);
+    }
+
     public function show(Book $book)
     {
         $coverTypes = $this->bookAttributes->getCoverTypes();
