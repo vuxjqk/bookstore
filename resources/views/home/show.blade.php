@@ -126,11 +126,18 @@
                         </div>
 
                         <!-- Wishlist Button -->
-                        <button onclick="toggleWishlist()" id="wishlist-btn"
+                        {{-- <button onclick="toggleWishlist()" id="wishlist-btn"
                             class="w-full border border-gray-300 hover:border-red-500 text-gray-700 hover:text-red-500 py-2 px-4 rounded-lg transition duration-200">
                             <i class="far fa-heart mr-2"></i>
                             Thêm vào yêu thích
-                        </button>
+                        </button> --}}
+                        @if (Auth::check() && Auth::user()->favorites()->where('book_id', $book->id)->exists())
+                            <button class="remove-favorite-btn text-red-500 hover:text-red-600"
+                                data-id="{{ $book->id }}">{{ __('Remove from Favorites') }}</button>
+                        @else
+                            <button class="add-favorite-btn text-gray-500 hover:text-blue-600"
+                                data-id="{{ $book->id }}">{{ __('Add to Favorites') }}</button>
+                        @endif
                     </div>
                 </div>
             </div>

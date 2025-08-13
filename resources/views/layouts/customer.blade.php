@@ -75,6 +75,22 @@
                 align-items: center;
             }
         }
+
+        .favorite-item {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem 0;
+            gap: 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .favorite-item {
+                flex-direction: row;
+                align-items: center;
+            }
+        }
     </style>
 </head>
 
@@ -125,10 +141,15 @@
 
                 <!-- Navigation Icons -->
                 <nav class="flex items-center space-x-4">
-                    <a href="#" class="text-gray-700 hover:text-blue-600 transition-colors"
-                        title="{{ __('Wishlist') }}" aria-label="{{ __('Wishlist') }}">
-                        <i class="fas fa-heart text-lg"></i>
-                        <span class="ml-1 hidden sm:inline">{{ __('Wishlist') }}</span>
+                    <a href="{{ route('favorites.index') }}" class="text-gray-700 hover:text-blue-600 transition-colors"
+                        title="{{ __('Favorites') }}" aria-label="{{ __('Favorites') }}">
+                        <i class="fas fa-heart text-lg relative">
+                            <span
+                                class="absolute -top-3 -right-3 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                {{ Auth::check() ? Auth::user()->favorites()->count() : 0 }}
+                            </span>
+                        </i>
+                        <span class="ml-1 hidden sm:inline">{{ __('Favorites') }}</span>
                     </a>
                     <a href="{{ route('cart.index') }}" class="text-gray-700 hover:text-blue-600 transition-colors"
                         title="{{ __('Cart') }}" aria-label="{{ __('Cart') }}">
@@ -463,6 +484,31 @@
                     sendRequest('{{ route('cart.add') }}', 'POST', {
                         book_id: bookId,
                         quantity
+                    });
+                });
+            });
+
+            // Favorites functionality
+            document.querySelectorAll('.remove-favorite-btn').forEach(button => {
+                button.addEventListener('click', async () => {
+                    const result = await openConfirmModal(
+                        '{{ __('Are you sure you want to remove this book from favorites?') }}'
+                    );
+
+                    if (result) {
+                        const bookId = button.dataset.id;
+                        sendRequest('{{ route('favorites.destroy') }}', 'POST', {
+                            book_id: bookId
+                        });
+                    }
+                });
+            });
+
+            document.querySelectorAll('.add-favorite-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const bookId = button.dataset.id;
+                    sendRequest('{{ route('favorites.store') }}', 'POST', {
+                        book_id: bookId
                     });
                 });
             });

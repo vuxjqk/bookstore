@@ -530,5 +530,13 @@
     "Shipping Fee": "Phí vận chuyển",
     "Total": "Tổng cộng",
     "Confirm Payment": "Xác nhận thanh toán",
-    "Are you sure you want to confirm this order?": "Bạn có chắc chắn muốn xác nhận đơn hàng này không?"
+    "Are you sure you want to confirm this order?": "Bạn có chắc chắn muốn xác nhận đơn hàng này không?",
+    "Your favorites list is empty.": "Danh sách yêu thích của bạn đang trống.",
+    "Please login to add to favorites.": "Vui lòng đăng nhập để thêm vào yêu thích.",
+    "Added to favorites successfully!": "Đã thêm vào yêu thích thành công!",
+    "Removed from favorites successfully!": "Đã xóa khỏi yêu thích thành công!",
+    "Item not found in favorites.": "Không tìm thấy sách trong danh sách yêu thích.",
+    "Are you sure you want to remove this book from favorites?": "Bạn có chắc muốn xóa sách này khỏi danh sách yêu thích?",
+    "Add to Favorites": "Thêm vào yêu thích",
+    "Remove from Favorites": "Xóa khỏi yêu thích"
 }
