@@ -23,10 +23,6 @@
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
     <style>
-        .rating-stars {
-            color: #fbbf24;
-        }
-
         .book-image-gallery .thumbnail:hover {
             transform: scale(1.05);
             transition: transform 0.2s ease-in;
@@ -377,7 +373,7 @@
             });
 
             // Toast notification
-            const showToast = (message, type = 'success') => {
+            window.showToast = (message, type = 'success') => {
                 const toast = document.getElementById('toast');
                 const messageElement = document.getElementById('toastMessage');
                 const iconElement = document.getElementById('toastIcon');

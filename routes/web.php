@@ -11,6 +11,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublisherController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 
@@ -46,6 +47,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites.index');
     Route::post('/favorites/store', [FavoriteController::class, 'store'])->name('favorites.store');
     Route::post('/favorites/destroy', [FavoriteController::class, 'destroy'])->name('favorites.destroy');
+
+    Route::post('/reviews/store', [ReviewController::class, 'store'])->name('reviews.store');
 
     Route::middleware(['role:admin'])->group(function () {
         Route::get('dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index');
