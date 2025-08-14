@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Book;
+use App\Models\Category;
+use App\Models\Publisher;
 use App\Services\BookAttributesService;
 use Illuminate\Http\Request;
 
@@ -15,9 +17,18 @@ class HomeController extends Controller
         $this->bookAttributes = $bookAttributes;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return view('home.index');
+        $books = Book::filter(request()->all())
+            ->with('author', 'images', 'reviews')
+            ->paginate(12)
+            ->appends($request->query());
+
+        $categories = Category::withCount('books')->get();
+        $publishers = Publisher::withCount('books')->get();
+        $languages = Book::distinct()->pluck('language');
+
+        return view('home.index', compact('books', 'categories', 'publishers', 'languages'));
     }
 
     public function autocomplete(Request $request)
@@ -44,7 +55,7 @@ class HomeController extends Controller
 
         $related_books = Book::where('id', '!=', $book->id)
             ->inRandomOrder()
-            ->limit(4)
+            ->take(4)
             ->get();
 
         return view('home.show', compact('book', 'coverTypes', 'related_books'));

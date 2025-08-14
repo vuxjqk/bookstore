@@ -87,6 +87,24 @@
                 align-items: center;
             }
         }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -125,14 +143,14 @@
                         aria-label="{{ __('Toggle search') }}">
                         <i class="fas fa-search text-2xl"></i>
                     </button>
-                    <div id="search-input"
+                    <form method="GET" action="{{ route('home.index') }}" id="search-input"
                         class="relative w-0 md:w-full hidden md:block transition-[width] duration-300">
                         <input type="search" id="book-search" name="search" value="{{ request('search') }}"
                             placeholder="{{ __('Search books...') }}"
                             class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             aria-label="{{ __('Search') }}">
                         <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                    </div>
+                    </form>
                 </div>
 
                 <!-- Navigation Icons -->
@@ -140,10 +158,12 @@
                     <a href="{{ route('favorites.index') }}" class="text-gray-700 hover:text-blue-600 transition-colors"
                         title="{{ __('Favorites') }}" aria-label="{{ __('Favorites') }}">
                         <i class="fas fa-heart text-lg relative">
-                            <span
-                                class="absolute -top-3 -right-3 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                                {{ Auth::check() ? Auth::user()->favorites()->count() : 0 }}
-                            </span>
+                            @auth
+                                <span
+                                    class="absolute -top-3 -right-3 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                    {{ Auth::user()->favorites()->count() }}
+                                </span>
+                            @endauth
                         </i>
                         <span class="ml-1 hidden sm:inline">{{ __('Favorites') }}</span>
                     </a>
@@ -157,11 +177,55 @@
                         </i>
                         <span class="ml-1 hidden sm:inline">{{ __('Cart') }}</span>
                     </a>
-                    <a href="#" class="text-gray-700 hover:text-blue-600 transition-colors"
-                        title="{{ __('Account') }}" aria-label="{{ __('Account') }}">
-                        <i class="fas fa-user text-lg"></i>
-                        <span class="ml-1 hidden sm:inline">{{ __('Account') }}</span>
-                    </a>
+
+                    <!-- User Menu -->
+                    <div class="relative">
+                        @auth
+                            <button id="userMenuButton"
+                                class="flex items-center gap-2 text-gray-700 hover:text-gray-900 focus:outline-none"
+                                aria-label="User Menu">
+                                @if (Auth::user()->avatar)
+                                    <img src="{{ asset('storage/' . Auth::user()->avatar) }}"
+                                        alt="{{ __('User Avatar') }}" class="w-8 h-8 rounded-full object-cover">
+                                @else
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">
+                                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                                    </div>
+                                @endif
+                                <span class="hidden md:block">{{ Auth::user()->name }}</span>
+                                <i class="fas fa-chevron-down text-sm"></i>
+                            </button>
+                        @endauth
+
+                        @guest
+                            <a href="{{ route('login') }}" class="text-gray-700 hover:text-blue-600 transition-colors"
+                                title="{{ __('Account') }}" aria-label="{{ __('Account') }}">
+                                <i class="fas fa-user text-lg"></i>
+                                <span class="ml-1 hidden sm:inline">{{ __('Account') }}</span>
+                            </a>
+                        @endguest
+
+                        <div id="userMenu"
+                            class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 hidden">
+                            <a href="{{ route('profile.edit') }}"
+                                class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-user w-5 mr-2"></i>{{ __('Profile') }}
+                            </a>
+                            <a href="#"
+                                class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-cog w-5 mr-2"></i>{{ __('Settings') }}
+                            </a>
+                            <hr class="my-1">
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit"
+                                    class="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                                    <i class="fas fa-sign-out-alt w-5 mr-2"></i>{{ __('Log Out') }}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </nav>
             </div>
         </div>
@@ -173,7 +237,8 @@
                     <a href="{{ url('/') }}"
                         class="hover:text-blue-200 transition-colors py-2">{{ __('Home') }}</a>
                     <a href="#" class="hover:text-blue-200 transition-colors py-2">{{ __('Novels') }}</a>
-                    <a href="#" class="hover:text-blue-200 transition-colors py-2">{{ __('Children Books') }}</a>
+                    <a href="#"
+                        class="hover:text-blue-200 transition-colors py-2">{{ __('Children Books') }}</a>
                     <a href="#" class="hover:text-blue-200 transition-colors py-2">{{ __('Textbooks') }}</a>
                     <a href="#"
                         class="hover:text-blue-200 transition-colors py-2">{{ __('Foreign Language Books') }}</a>
@@ -391,7 +456,7 @@
                 setTimeout(() => {
                     toast.classList.add('translate-x-full');
                     toast.classList.remove('translate-x-0');
-                }, 3000);
+                }, 5000);
             };
 
             // Handle session storage messages
@@ -415,6 +480,28 @@
 
             @if (session('error'))
                 showToast("{{ session('error') }}", "error");
+            @endif
+
+            @if (session('status'))
+                showToast("{{ session('status') }}", "success");
+            @endif
+
+            @if (session('status') == 'verification-link-sent')
+                showToast(
+                    "{{ __('A new verification link has been sent to the email address you provided during registration.') }}",
+                    'success');
+            @endif
+
+            @if (session('status') === 'verification-link-sent')
+                showToast("{{ __('A new verification link has been sent to your email address.') }}", "success");
+            @endif
+
+            @if (session('status') === 'profile-updated')
+                showToast("{{ __('Saved.') }}", "success");
+            @endif
+
+            @if (session('status') === 'password-updated')
+                showToast("{{ __('Saved.') }}", 'success');
             @endif
 
             // Modal
@@ -476,7 +563,8 @@
             document.querySelectorAll('.add-to-cart-btn').forEach(button => {
                 button.addEventListener('click', () => {
                     const bookId = button.dataset.id;
-                    const quantity = document.getElementById('quantity').value;
+                    const quantityElement = document.getElementById('quantity');
+                    const quantity = quantityElement ? quantityElement.value : 1;
                     sendRequest('{{ route('cart.add') }}', 'POST', {
                         book_id: bookId,
                         quantity
@@ -508,6 +596,22 @@
                     });
                 });
             });
+
+            // User menu functionality
+            const userMenuButton = document.getElementById('userMenuButton');
+            const userMenu = document.getElementById('userMenu');
+
+            if (userMenuButton && userMenu) {
+                userMenuButton.addEventListener('click', () => {
+                    userMenu.classList.toggle('hidden');
+                });
+
+                document.addEventListener('click', (event) => {
+                    if (!userMenuButton.contains(event.target) && !userMenu.contains(event.target)) {
+                        userMenu.classList.add('hidden');
+                    }
+                });
+            }
         });
 
         // Autocomplete book search

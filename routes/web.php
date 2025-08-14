@@ -13,10 +13,14 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublisherController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SupplierController;
+use App\Models\Book;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    $related_books = Book::inRandomOrder()
+        ->take(4)
+        ->get();
+    return view('index', compact('related_books'));
 });
 
 Route::get('/home', [HomeController::class, 'index'])->name('home.index');
@@ -32,14 +36,14 @@ Route::get('/cart/payment', [CartController::class, 'payment'])->name('cart.paym
 Route::get('/cart/success', [CartController::class, 'success'])->name('cart.success');
 Route::post('/orders/store', [OrderController::class, 'store'])->name('orders.store');
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
 Route::get('/auth/{provider}', [SocialiteController::class, 'redirect']);
 Route::get('/auth/{provider}/callback', [SocialiteController::class, 'callback']);
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/welcome', function () {
+        return view('welcome');
+    })->name('dashboard');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

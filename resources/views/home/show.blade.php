@@ -144,21 +144,31 @@
                         </div>
 
                         <!-- Wishlist Button -->
-                        @if (Auth::check() && Auth::user()->favorites()->where('book_id', $book->id)->exists())
-                            <button
-                                class="remove-favorite-btn w-full border border-red-500 hover:border-red-500 text-red-500 hover:text-red-500 py-2 px-4 rounded-lg transition duration-200"
-                                data-id="{{ $book->id }}">
-                                <i class="fas fa-heart mr-2"></i>
-                                {{ __('Added to Favorites') }}
-                            </button>
-                        @else
-                            <button
-                                class="add-favorite-btn w-full border border-gray-300 hover:border-red-500 text-gray-700 hover:text-red-500 py-2 px-4 rounded-lg transition duration-200"
-                                data-id="{{ $book->id }}">
+                        @auth
+                            @if (Auth::user()->favorites()->where('book_id', $book->id)->exists())
+                                <button
+                                    class="remove-favorite-btn w-full border border-red-500 hover:border-red-500 text-red-500 hover:text-red-500 py-2 px-4 rounded-lg transition duration-200"
+                                    data-id="{{ $book->id }}">
+                                    <i class="fas fa-heart mr-2"></i>
+                                    {{ __('Added to Favorites') }}
+                                </button>
+                            @else
+                                <button
+                                    class="add-favorite-btn w-full border border-gray-300 hover:border-red-500 text-gray-700 hover:text-red-500 py-2 px-4 rounded-lg transition duration-200"
+                                    data-id="{{ $book->id }}">
+                                    <i class="far fa-heart mr-2"></i>
+                                    {{ __('Add to Favorites') }}
+                                </button>
+                            @endif
+                        @endauth
+
+                        @guest
+                            <button onclick="showToast('{{ __('Please login to add to favorites.') }}', 'error')"
+                                class="w-full border border-gray-300 hover:border-red-500 text-gray-700 hover:text-red-500 py-2 px-4 rounded-lg transition duration-200"
                                 <i class="far fa-heart mr-2"></i>
                                 {{ __('Add to Favorites') }}
                             </button>
-                        @endif
+                        @endguest
                     </div>
                 </div>
             </div>
@@ -327,7 +337,7 @@
                                 <img src="{{ asset('storage/' . $image->image_path) }}" alt="{{ $image->alt_text }}"
                                     class="object-contain h-full w-full" />
                             @else
-                                <i class="fas fa-book text-white text-9xl"></i>
+                                <i class="fas fa-book text-white text-6xl"></i>
                             @endif
                         </div>
                         <h3 class="font-semibold text-gray-800 mb-2 line-clamp-2">
