@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('authors', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 100)->unique();
-            $table->string('slug', 150)->unique();
-            $table->text('description')->nullable();
+            $table->string('name')->unique();
+            $table->string('slug')->unique();
+            $table->string('email')->nullable()->unique();
+            $table->text('biography')->nullable();
             $table->timestamps();
         });
     }

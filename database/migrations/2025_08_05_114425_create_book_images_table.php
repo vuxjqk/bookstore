@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('book_images', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('book_id')->constrained('books')->cascadeOnDelete();
-            $table->string('image_path', 255);
-            $table->string('alt_text', 255)->nullable();
+            $table->foreignId('book_id')->constrained()->cascadeOnDelete();
+            $table->string('image_path');
+            $table->string('alt_text');
             $table->timestamps();
         });
     }
