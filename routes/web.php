@@ -75,8 +75,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
-        Route::get('/orders/{order}/edit', [OrderController::class, 'edit'])->name('orders.edit');
         Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
+        Route::put('/orders/{order}', [OrderController::class, 'update'])->name('orders.update');
 
         Route::get('/invoices/{order}/export', [PDFController::class, 'exportInvoice'])->name('invoices.export');
 

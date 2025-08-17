@@ -209,7 +209,7 @@
                                         @if (!$order->trashed())
                                             <x-export-pdf-button :route="route('invoices.export', $order)" />
                                             <x-show-button :route="route('orders.show', $order)" />
-                                            <x-edit-button :route="route('orders.edit', $order)" />
+                                            <x-status-update-button :route="route('orders.update', $order)" />
                                             <x-delete-button :route="route('orders.destroy', $order)" />
                                         @else
                                             <button data-restore-route="route('orders.destroy', $order)"
@@ -231,6 +231,8 @@
                 {{ $orders->links() }}
             </div>
 
+            <!-- Status Update Modal -->
+            <x-status-update-modal />
             <!-- Delete Modal -->
             <x-delete-modal />
         </main>

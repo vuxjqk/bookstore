@@ -25,7 +25,7 @@
                 <div class="flex items-center gap-3">
                     <x-back-button :route="route('orders.index')" />
                     <x-export-pdf-button :route="route('invoices.export', $order)" />
-                    <x-edit-button :route="route('orders.edit', $order)" />
+                    <x-status-update-button :route="route('orders.update', $order)" />
                 </div>
             </div>
 
@@ -308,6 +308,9 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Status Update Modal -->
+            <x-status-update-modal />
         </main>
     </div>
 @endsection

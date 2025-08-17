@@ -153,15 +153,30 @@ class OrderController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Order $order)
+    public function update(Order $order)
     {
-        $validated = $request->validate([
-            'status' => 'required|in:pending,confirmed,processing,shipping,delivered,completed,cancelled,refunded,failed',
-        ]);
+        $statusFlow = ['pending', 'confirmed', 'processing', 'shipping', 'delivered', 'completed'];
 
-        $order->update($validated);
+        $currentIndex = array_search($order->status, $statusFlow);
+        if ($currentIndex === false) {
+            return redirect()
+                ->back()
+                ->with('error', __('Current status :status is invalid.', ['status' => $order->status]));
+        }
 
-        return redirect()->back()->with('success', __('Order status updated successfully'));
+        $nextStatus = $statusFlow[$currentIndex + 1] ?? null;
+
+        if (!$nextStatus) {
+            return redirect()
+                ->back()
+                ->with('error', __('Order is already in final status.'));
+        }
+
+        $order->update(['status' => $nextStatus]);
+
+        return redirect()
+            ->back()
+            ->with('success', __('Order status advanced to :status.', ['status' => $nextStatus]));
     }
 
     /**
