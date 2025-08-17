@@ -13,14 +13,9 @@ class SupplierController extends Controller
      */
     public function index(Request $request)
     {
-        $search = $request->input('search');
-
-        $suppliers = Supplier::when($search, function ($query, $search) {
-            return $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%')
-                    ->orWhere('slug', 'like', '%' . $search . '%');
-            });
-        })->latest()->paginate(10)->appends($request->query());
+        $suppliers = Supplier::filter($request->all())
+            ->paginate(10)
+            ->appends($request->query());
 
         return view('suppliers.index', compact('suppliers'));
     }
@@ -39,9 +34,12 @@ class SupplierController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:100|unique:suppliers,name',
-            'slug' => 'required|string|max:150|unique:suppliers,slug',
-            'description' => 'nullable|string',
+            'name' => 'required|string|max:255|unique:suppliers,name',
+            'contact_name' => 'nullable|string|max:255',
+            'email' => 'required|string|max:255|unique:suppliers,email',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:255',
+            'notes' => 'nullable|string',
         ]);
 
         Supplier::create($validated);
@@ -71,9 +69,12 @@ class SupplierController extends Controller
     public function update(Request $request, Supplier $supplier)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:100|unique:suppliers,name,' . $supplier->id,
-            'slug' => 'required|string|max:150|unique:suppliers,slug,' . $supplier->id,
-            'description' => 'nullable|string',
+            'name' => 'required|string|max:255|unique:suppliers,name,' . $supplier->id,
+            'contact_name' => 'nullable|string|max:255',
+            'email' => 'required|string|max:255|unique:suppliers,email,' . $supplier->id,
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:255',
+            'notes' => 'nullable|string',
         ]);
 
         $supplier->update($validated);

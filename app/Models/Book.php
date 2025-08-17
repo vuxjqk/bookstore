@@ -25,6 +25,16 @@ class Book extends Model
         'status',
     ];
 
+    protected const SORT_OPTIONS = [
+        'a_to_z' => ['title', 'asc'],
+        'z_to_a' => ['title', 'desc'],
+        'newest' => ['publication_year', 'desc'],
+        'oldest' => ['publication_year', 'asc'],
+        'price_low_to_high' => ['sale_price', 'asc'],
+        'price_high_to_low' => ['sale_price', 'desc'],
+        'highest_rated' => ['reviews_avg_rating', 'desc'],
+    ];
+
     public function author()
     {
         return $this->belongsTo(Author::class);
@@ -45,6 +55,11 @@ class Book extends Model
         return $this->hasMany(BookImage::class);
     }
 
+    public function firstImage()
+    {
+        return $this->hasOne(BookImage::class)->orderBy('id');
+    }
+
     public function reviews()
     {
         return $this->hasMany(Review::class);
@@ -55,118 +70,74 @@ class Book extends Model
         return $this->reviews()->avg('rating') ?: 0;
     }
 
+    protected function applyRelationFilter($query, $relation, $filterKey, $filters)
+    {
+        $query->when(
+            !empty($filters[$filterKey]) && is_array($filters[$filterKey]) && !empty($filters[$filterKey][0]),
+            fn($q) =>
+            $q->whereHas(
+                $relation,
+                fn($q) =>
+                $q->whereIn('id', $filters[$filterKey])
+            )
+        );
+    }
+
     public function scopeFilter($query, array $filters)
     {
-        // Search by title or slug
         $query->when(
             $filters['search'] ?? null,
-            function ($q, $search) {
-                $q->where(
-                    function ($q) use ($search) {
-                        $q->where('title', 'like', "%{$search}%")
-                            ->orWhere('slug', 'like', "%{$search}%");
-                    }
-                );
-            }
+            fn($q, $search) =>
+            $q->where(
+                fn($q) =>
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('slug', 'like', "%{$search}%")
+            )
         );
 
-        // Filter by multiple categories (checkboxes)
-        $query->when(
-            !empty($filters['categories']) && is_array($filters['categories']),
-            function ($q) use ($filters) {
-                $q->whereHas('categories', function ($q) use ($filters) {
-                    $q->whereIn('id', $filters['categories']);
-                });
-            }
-        );
+        $this->applyRelationFilter($query, 'categories', 'categories', $filters);
+        $this->applyRelationFilter($query, 'publisher', 'publishers', $filters);
 
-        // Filter by price range
         $query->when(
             isset($filters['price_min']) && is_numeric($filters['price_min']),
-            fn($q, $value) => $q->where('sale_price', '>=', $filters['price_min'])
+            fn($q) =>
+            $q->where('sale_price', '>=', $filters['price_min'])
         );
-
         $query->when(
             isset($filters['price_max']) && is_numeric($filters['price_max']),
-            fn($q, $value) => $q->where('sale_price', '<=', $filters['price_max'])
+            fn($q) =>
+            $q->where('sale_price', '<=', $filters['price_max'])
         );
 
-        // Filter by rating
         $query->when(
             isset($filters['rating']) && is_numeric($filters['rating']),
-            function ($q) use ($filters) {
-                $q->whereHas('reviews', function ($q) use ($filters) {
-                    $q->select('book_id')
-                        ->groupBy('book_id')
-                        ->havingRaw('AVG(rating) >= ?', [$filters['rating']]);
-                });
-            }
+            fn($q) =>
+            $q->withAvg('reviews', 'rating')
+                ->where('reviews_avg_rating', '>=', $filters['rating'])
         );
 
-        // Filter by multiple publishers (checkboxes)
-        $query->when(
-            !empty($filters['publishers']) && is_array($filters['publishers']),
-            function ($q) use ($filters) {
-                $q->whereHas('publisher', function ($q) use ($filters) {
-                    $q->whereIn('id', $filters['publishers']);
-                });
-            }
-        );
-
-        // Filter by language
         $query->when(
             !empty($filters['languages']) && is_array($filters['languages']),
-            fn($q) => $q->whereIn('language', $filters['languages'])
+            fn($q) =>
+            $q->whereIn('language', $filters['languages'])
+        );
+        $query->when(
+            !empty($filters['statuses']) && is_array($filters['statuses']) && !empty($filters['statuses'][0]),
+            fn($q) =>
+            $q->whereIn('status', $filters['statuses'])
         );
 
-        // Filter by status
-        $query->when(
-            $filters['status'] ?? null,
-            fn($q, $value) => $q->where('status', $value)
-        );
-
-        // Filter by stock availability (optional enhancement)
-        $query->when(
-            !empty($filters['in_stock']) && is_array($filters['in_stock']),
-            function ($q) use ($filters) {
-                $q->where(function ($query) use ($filters) {
-                    $values = array_unique($filters['in_stock']);
-                    if (count($values) === 1) {
-                        $query->where('stock_quantity', $values[0] == '1' ? '>' : '=', 0);
-                    } else {
-                        $query->where('stock_quantity', '>=', 0);
-                    }
-                });
-            }
-        );
-
-        // Sorting
-        $query->when(
-            $filters['sort'] ?? null,
-            function ($q) use ($filters) {
-                switch ($filters['sort']) {
-                    case 'newest':
-                        $q->orderBy('publication_year', 'desc');
-                        break;
-                    case 'oldest':
-                        $q->orderBy('publication_year', 'asc');
-                        break;
-                    case 'price_low_to_high':
-                        $q->orderBy('sale_price', 'asc');
-                        break;
-                    case 'price_high_to_low':
-                        $q->orderBy('sale_price', 'desc');
-                        break;
-                    case 'highest_rated':
-                        $q->withAvg('reviews', 'rating')->orderBy('reviews_avg_rating', 'desc');
-                        break;
-                    default:
-                        $q->orderBy('created_at', 'desc');
-                        break;
+        $query->when($filters['sort'] ?? null, function ($q) use ($filters) {
+            if (array_key_exists($filters['sort'], self::SORT_OPTIONS)) {
+                [$column, $direction] = self::SORT_OPTIONS[$filters['sort']];
+                if ($column === 'reviews_avg_rating') {
+                    $q->withAvg('reviews', 'rating');
                 }
-            },
-            fn($q) => $q->orderBy('created_at', 'desc') // Default sort
-        );
+                $q->orderBy($column, $direction);
+            } else {
+                $q->orderBy('created_at', 'desc');
+            }
+        }, fn($q) => $q->orderBy('created_at', 'desc'));
 
         return $query;
     }

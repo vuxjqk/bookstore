@@ -1,114 +1,89 @@
 @extends('layouts.admin')
 
-@section('title', __('Publisher management'))
+@section('title', __('Publisher Management'))
 
 @section('content')
-    <div class="py-6">
+    <div class="py-8 px-4 sm:px-6 lg:px-8">
         <!-- Breadcrumb -->
-        <nav class="bg-gray-50 px-6 py-3 text-gray-700">
-            <ol class="list-reset flex text-sm">
-                <li><a href="#" class="text-blue-600 hover:text-blue-800">{{ __('Home') }}</a></li>
-                <li><span class="mx-2">/</span></li>
-                <li class="text-gray-500">{{ __('Publisher management') }}</li>
-            </ol>
-        </nav>
+        <x-breadcrumb :items="[['label' => 'Home', 'url' => url('/')], ['label' => 'Publisher Management']]" />
 
         <!-- Main Content Area -->
-        <main class="p-6">
+        <main class="mt-6 bg-gray-50 rounded-xl shadow-sm p-6 sm:p-8">
             <!-- Header -->
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">{{ __('Publisher management') }}</h1>
-                    <p class="text-gray-600 mt-1">{{ __('List of all publishers in the system') }}</p>
+                    <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-building text-blue-500"></i>
+                        {{ __('Publisher Management') }}
+                    </h1>
+                    <p class="text-gray-600 mt-1 text-sm">{{ __('Manage all publishers in the system.') }}</p>
                 </div>
                 <div>
-                    <a href="{{ route('publishers.create') }}"
-                        class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors duration-200">
-                        <i class="fas fa-plus mr-2"></i>{{ __('Add new publisher') }}
-                    </a>
+                    <x-create-button :route="route('publishers.create')" :title="__('Add New Publisher')" />
                 </div>
             </div>
 
             <!-- Search -->
-            <div class="bg-white rounded-lg shadow p-6 mb-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                    <i class="fas fa-filter mr-2 text-blue-500"></i>{{ __('Search') }}
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                    <i class="fas fa-filter text-blue-500"></i>
+                    {{ __('Search Publishers') }}
                 </h3>
                 <form class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <x-input-label for="search" :value="__('Search')" />
-                        <x-text-input id="search" class="block mt-1 w-full" type="search" name="search"
-                            :value="request('search')" placeholder="{{ __('Publisher name, slug...') }}" />
+                        <x-form-label for="search" value="Search" icon="fas fa-search" />
+                        <x-text-input id="search" name="search" type="search" :value="request('search')"
+                            placeholder="{{ __('Search by publisher name or slug...') }}" />
                     </div>
                     <div class="flex items-end">
-                        <button type="submit"
-                            class="w-full px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors duration-200">
-                            <i class="fas fa-search mr-2"></i>{{ __('Search') }}
-                        </button>
+                        <x-primary-button type="submit">
+                            <i class="fas fa-search mr-2"></i>
+                            {{ __('Search') }}
+                        </x-primary-button>
                     </div>
                 </form>
             </div>
 
             <!-- Publishers Table -->
-            <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900">
-                        <i class="fas fa-list mr-2 text-green-500"></i>{{ __('Publisher list') }}
-                    </h3>
-                </div>
+            <x-table title="Publisher List">
+                <x-thead>
+                    <x-tr>
+                        <x-th>
+                            <div class="flex items-center justify-between">
+                                <span>{{ __('Name') }}</span>
+                                <x-sortable-column :options="['a_to_z', 'z_to_a']" />
+                            </div>
+                        </x-th>
+                        <x-th>{{ __('Slug') }}</x-th>
+                        <x-th>{{ __('Email') }}</x-th>
+                        <x-th>{{ __('Actions') }}</x-th>
+                    </x-tr>
+                </x-thead>
+                <x-tbody>
+                    @foreach ($publishers as $publisher)
+                        <x-tr>
+                            <x-td>{{ $publisher->name }}</x-td>
+                            <x-td>{{ $publisher->slug }}</x-td>
+                            <x-td>{{ $publisher->email ?? __('No email') }}</x-td>
+                            <x-td>
+                                <div class="flex items-center gap-2">
+                                    <x-show-button :route="route('publishers.show', $publisher)" />
+                                    <x-edit-button :route="route('publishers.edit', $publisher)" />
+                                    <x-delete-button :route="route('publishers.destroy', $publisher)" />
+                                </div>
+                            </x-td>
+                        </x-tr>
+                    @endforeach
+                </x-tbody>
+            </x-table>
 
-                <div class="overflow-x-auto">
-                    <table class="min-w-[800px] w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    {{ __('Name') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    {{ __('Slug') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    {{ __('Description') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    {{ __('Actions') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach ($publishers as $publisher)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        {{ $publisher->name }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $publisher->slug }}
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-500">
-                                        {{ $publisher->description ?? __('No description') }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div class="flex space-x-2">
-                                            <a href="{{ route('publishers.show', $publisher->id) }}"
-                                                class="text-blue-600 hover:text-blue-900" title="{{ __('Details') }}">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ route('publishers.edit', $publisher->id) }}"
-                                                class="text-yellow-600 hover:text-yellow-900" title="{{ __('Edit') }}">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <button
-                                                onclick="openDeleteModal('{{ route('publishers.destroy', $publisher->id) }}')"
-                                                class="text-red-600 hover:text-red-900 delete-btn"
-                                                title="{{ __('Delete') }}">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Pagination -->
-                <div class="bg-white px-6 py-4 border-t border-gray-200">
-                    {{ $publishers->links() }}
-                </div>
+            <!-- Pagination -->
+            <div class="mt-6 bg-white rounded-lg shadow-sm p-6">
+                {{ $publishers->links() }}
             </div>
+
+            <!-- Delete Modal -->
+            <x-delete-modal />
         </main>
     </div>
 @endsection

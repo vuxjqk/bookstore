@@ -28,6 +28,18 @@
                 </button>
             </div>
 
+            <!-- Main Content Area -->
+            <div>
+                <x-select id="language-select" class="block mt-1 w-full" onchange="changeLanguage(this.value)">
+                    <option value="vi" {{ app()->getLocale() == 'vi' ? 'selected' : '' }}>
+                        {{ __('Vietnamese') }}
+                    </option>
+                    <option value="en" {{ app()->getLocale() == 'en' ? 'selected' : '' }}>
+                        {{ __('English') }}
+                    </option>
+                </x-select>
+            </div>
+
             <!-- User Menu -->
             <div class="relative">
                 <button id="userMenuButton"
@@ -68,3 +80,13 @@
         </div>
     </div>
 </header>
+
+@push('scripts')
+    <script>
+        function changeLanguage(locale) {
+            let url = "{{ route('change.locale', ['locale' => '__locale__']) }}";
+            url = url.replace('__locale__', locale);
+            window.location.href = url;
+        }
+    </script>
+@endpush

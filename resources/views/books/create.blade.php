@@ -3,32 +3,27 @@
 @section('title', __('Create Book'))
 
 @section('content')
-    <div class="py-6">
+    <div class="py-8 px-4 sm:px-6 lg:px-8">
         <!-- Breadcrumb -->
-        <nav class="bg-gray-50 px-6 py-3 text-gray-700">
-            <ol class="list-reset flex text-sm">
-                <li><a href="#" class="text-blue-600 hover:text-blue-800">{{ __('Home') }}</a></li>
-                <li><span class="mx-2">/</span></li>
-                <li><a href="{{ route('books.index') }}"
-                        class="text-blue-600 hover:text-blue-800">{{ __('Book Management') }}</a></li>
-                <li><span class="mx-2">/</span></li>
-                <li class="text-gray-500">{{ __('Create Book') }}</li>
-            </ol>
-        </nav>
+        <x-breadcrumb :items="[
+            ['label' => 'Home', 'url' => url('/')],
+            ['label' => 'Book Management', 'url' => route('books.index')],
+            ['label' => 'Create Book'],
+        ]" />
 
         <!-- Main Content Area -->
-        <main class="p-6">
+        <main class="mt-6 bg-gray-50 rounded-xl shadow-sm p-6 sm:p-8">
             <!-- Header -->
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">{{ __('Create Book') }}</h1>
-                    <p class="text-gray-600 mt-1">{{ __('Add new book details') }}</p>
+                    <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-book text-blue-500"></i>
+                        {{ __('Create Book') }}
+                    </h1>
+                    <p class="text-gray-600 mt-1 text-sm">{{ __('Add a new book to the system.') }}</p>
                 </div>
                 <div>
-                    <a href="{{ route('books.index') }}"
-                        class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors duration-200">
-                        <i class="fas fa-times mr-2"></i>{{ __('Cancel') }}
-                    </a>
+                    <x-back-button :route="route('books.index')" />
                 </div>
             </div>
 
@@ -38,215 +33,126 @@
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- Main Information -->
                     <div class="lg:col-span-2">
-                        <div class="bg-white rounded-lg shadow p-6 space-y-6">
-                            <h3 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-3">
-                                <i class="fas fa-info-circle mr-2 text-blue-500"></i>{{ __('Basic Information') }}
+                        <div class="bg-white rounded-lg shadow-sm p-6 space-y-6">
+                            <h3
+                                class="text-lg font-semibold text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-3">
+                                <i class="fas fa-info-circle text-blue-500"></i>
+                                {{ __('Basic Information') }}
                             </h3>
 
                             <!-- Title -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2" for="title">
-                                    {{ __('Title') }} <span class="text-red-500">*</span>
-                                </label>
-                                <input type="text" name="title" id="title" value="{{ old('title') }}" required
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="{{ __('Enter book title') }}">
-                                @error('title')
-                                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                @enderror
+                                <x-form-label for="title" value="Title" icon="fas fa-book" required />
+                                <x-text-input id="title" name="title" type="text" :value="old('title')" required
+                                    autofocus autocomplete="title" placeholder="{{ __('Enter book title') }}" />
+                                <x-input-error :messages="$errors->get('title')" class="mt-2" />
                             </div>
 
                             <!-- Slug -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2" for="slug">
-                                    {{ __('Slug') }} <span class="text-red-500">*</span>
-                                </label>
-                                <input type="text" name="slug" id="slug" value="{{ old('slug') }}" required
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="{{ __('Enter book slug') }}">
-                                @error('slug')
-                                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                @enderror
+                                <x-form-label for="slug" value="Slug" icon="fas fa-link" required />
+                                <x-text-input id="slug" name="slug" type="text" :value="old('slug')" required
+                                    autocomplete="slug" placeholder="{{ __('Enter book slug') }}" />
+                                <x-input-error :messages="$errors->get('slug')" class="mt-2" />
                             </div>
 
                             <!-- Author and Publisher -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2" for="author_id">
-                                        {{ __('Author') }}
-                                    </label>
-                                    <select name="author_id" id="author_id"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                        <option value="">{{ __('Select author') }}</option>
-                                        @foreach ($authors as $author)
-                                            <option value="{{ $author->id }}"
-                                                {{ old('author_id') === $author->id ? 'selected' : '' }}>
-                                                {{ $author->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('author_id')
-                                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                    @enderror
+                                    <x-form-label for="author_id" value="Author" icon="fas fa-user" />
+                                    <x-select id="author_id" name="author_id" :options="$authors->pluck('name', 'id')->toArray()"
+                                        placeholder="{{ __('Select author') }}" :selected="old('author_id')" />
+                                    <x-input-error :messages="$errors->get('author_id')" class="mt-2" />
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2" for="publisher_id">
-                                        {{ __('Publisher') }}
-                                    </label>
-                                    <select name="publisher_id" id="publisher_id"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                        <option value="">{{ __('Select publisher') }}</option>
-                                        @foreach ($publishers as $publisher)
-                                            <option value="{{ $publisher->id }}"
-                                                {{ old('publisher_id') === $publisher->id ? 'selected' : '' }}>
-                                                {{ $publisher->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('publisher_id')
-                                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                    @enderror
+                                    <x-form-label for="publisher_id" value="Publisher" icon="fas fa-building" />
+                                    <x-select id="publisher_id" name="publisher_id" :options="$publishers->pluck('name', 'id')->toArray()"
+                                        placeholder="{{ __('Select publisher') }}" :selected="old('publisher_id')" />
+                                    <x-input-error :messages="$errors->get('publisher_id')" class="mt-2" />
                                 </div>
                             </div>
 
                             <!-- ISBN and Language -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2" for="isbn">
-                                        {{ __('ISBN') }}
-                                    </label>
-                                    <input type="text" name="isbn" id="isbn" value="{{ old('isbn') }}"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="{{ __('Enter ISBN') }}">
-                                    @error('isbn')
-                                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                    @enderror
+                                    <x-form-label for="isbn" value="ISBN" icon="fas fa-barcode" />
+                                    <x-text-input id="isbn" name="isbn" type="text" :value="old('isbn')"
+                                        autocomplete="isbn" placeholder="{{ __('Enter ISBN') }}" />
+                                    <x-input-error :messages="$errors->get('isbn')" class="mt-2" />
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2" for="language">
-                                        {{ __('Language') }}
-                                    </label>
-                                    <input list="languages" name="language" id="language" value="{{ old('language') }}"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="{{ __('Enter language') }}">
-                                    <datalist id="languages">
-                                        @foreach ($languages as $lang)
-                                            <option value="{{ $lang }}">
-                                        @endforeach
-                                    </datalist>
-                                    @error('language')
-                                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                    @enderror
+                                    <x-form-label for="language" value="Language" icon="fas fa-language" />
+                                    <x-select id="language" name="language" :options="$languages"
+                                        placeholder="{{ __('Select language') }}" :selected="old('language')" />
+                                    <x-input-error :messages="$errors->get('language')" class="mt-2" />
                                 </div>
                             </div>
 
                             <!-- Description -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2" for="description">
-                                    {{ __('Description') }}
-                                </label>
-                                <textarea name="description" id="description" rows="4"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="{{ __('Enter book description') }}">
-                                    {{ old('description') }}    
-                                </textarea>
-                                @error('description')
-                                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                @enderror
+                                <x-form-label for="description" value="Description" icon="fas fa-align-left" />
+                                <x-textarea id="description" name="description" autocomplete="description"
+                                    placeholder="{{ __('Enter book description') }}">{{ old('description') }}</x-textarea>
+                                <x-input-error :messages="$errors->get('description')" class="mt-2" />
                             </div>
                         </div>
 
                         <!-- Technical Details -->
-                        <div class="bg-white rounded-lg shadow p-6 space-y-6 mt-6">
-                            <h3 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-3">
-                                <i class="fas fa-cogs mr-2 text-green-500"></i>{{ __('Technical Details') }}
+                        <div class="bg-white rounded-lg shadow-sm p-6 space-y-6 mt-6">
+                            <h3
+                                class="text-lg font-semibold text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-3">
+                                <i class="fas fa-cogs text-green-500"></i>
+                                {{ __('Technical Details') }}
                             </h3>
 
                             <!-- Pages, Weight, Dimensions -->
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2" for="pages">
-                                        {{ __('Pages') }}
-                                    </label>
-                                    <input type="number" name="pages" id="pages" value="{{ old('pages') }}"
-                                        min="0"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="{{ __('Enter pages') }}">
-                                    @error('pages')
-                                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                    @enderror
+                                    <x-form-label for="pages" value="Pages" icon="fas fa-file" />
+                                    <x-text-input id="pages" name="pages" type="number" :value="old('pages')"
+                                        min="0" placeholder="{{ __('Enter pages') }}" />
+                                    <x-input-error :messages="$errors->get('pages')" class="mt-2" />
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2" for="dimensions">
-                                        {{ __('Dimensions') }}
-                                    </label>
-                                    <input list="dimensions_list" name="dimensions" id="dimensions"
-                                        value="{{ old('dimensions') }}"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="{{ __('Enter dimensions') }}">
-                                    <datalist id="dimensions_list">
-                                        @foreach ($dimensions as $dim)
-                                            <option value="{{ $dim }}">
-                                        @endforeach
-                                    </datalist>
-                                    @error('dimensions')
-                                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                    @enderror
+                                    <x-form-label for="dimensions" value="Dimensions" icon="fas fa-ruler" />
+                                    <x-select id="dimensions" name="dimensions" :options="$dimensions"
+                                        placeholder="{{ __('Select dimensions') }}" :selected="old('dimensions')" />
+                                    <x-input-error :messages="$errors->get('dimensions')" class="mt-2" />
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2" for="weight">
-                                        {{ __('Weight (g)') }}
-                                    </label>
-                                    <input type="number" name="weight" id="weight" value="{{ old('weight') }}"
-                                        min="0"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="{{ __('Enter weight') }}">
-                                    @error('weight')
-                                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                    @enderror
+                                    <x-form-label for="weight" value="Weight (g)" icon="fas fa-weight" />
+                                    <x-text-input id="weight" name="weight" type="number" :value="old('weight')"
+                                        min="0" placeholder="{{ __('Enter weight') }}" />
+                                    <x-input-error :messages="$errors->get('weight')" class="mt-2" />
                                 </div>
                             </div>
 
                             <!-- Publication Year, Cover Type -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2" for="publication_year">
-                                        {{ __('Publication Year') }}
-                                    </label>
-                                    <input type="number" name="publication_year" id="publication_year"
-                                        value="{{ old('publication_year') }}" min="1000" max="{{ date('Y') }}"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="{{ __('Enter publication year') }}">
-                                    @error('publication_year')
-                                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                    @enderror
+                                    <x-form-label for="publication_year" value="Publication Year"
+                                        icon="fas fa-calendar" />
+                                    <x-text-input id="publication_year" name="publication_year" type="number"
+                                        :value="old('publication_year')" min="1000" max="{{ date('Y') }}"
+                                        placeholder="{{ __('Enter publication year') }}" />
+                                    <x-input-error :messages="$errors->get('publication_year')" class="mt-2" />
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2" for="cover_type">
-                                        {{ __('Cover Type') }}
-                                    </label>
-                                    <select name="cover_type" id="cover_type"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                        <option value="">{{ __('Select cover type') }}</option>
-                                        @foreach ($coverTypes as $key => $label)
-                                            <option value="{{ $key }}"
-                                                {{ old('cover_type') === $key ? 'selected' : '' }}>
-                                                {{ $label }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('cover_type')
-                                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                    @enderror
+                                    <x-form-label for="cover_type" value="Cover Type" icon="fas fa-book-open" />
+                                    <x-select id="cover_type" name="cover_type" :options="$coverTypes"
+                                        placeholder="{{ __('Select cover type') }}" :selected="old('cover_type')" />
+                                    <x-input-error :messages="$errors->get('cover_type')" class="mt-2" />
                                 </div>
                             </div>
                         </div>
 
                         <!-- Image Upload -->
-                        <div class="bg-white rounded-lg shadow p-6 space-y-6 mt-6">
-                            <h3 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-3">
-                                <i class="fas fa-image mr-2 text-indigo-500"></i>{{ __('Book Images') }}
+                        <div class="bg-white rounded-lg shadow-sm p-6 space-y-6 mt-6">
+                            <h3
+                                class="text-lg font-semibold text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-3">
+                                <i class="fas fa-image text-indigo-500"></i>
+                                {{ __('Book Images') }}
                             </h3>
-
                             <div class="space-y-4">
                                 <div
                                     class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors duration-200">
@@ -260,12 +166,8 @@
                                     </label>
                                     <p class="text-xs text-gray-400 mt-2">
                                         {{ __('PNG, JPG, JPEG, GIF, SVG up to 4MB each') }}</p>
-                                    @error('images.*')
-                                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                    @enderror
+                                    <x-input-error :messages="$errors->get('images.*')" class="mt-2" />
                                 </div>
-
-                                <!-- Preview area -->
                                 <div id="imagePreviewContainer" class="flex flex-wrap gap-4 mt-4 hidden"></div>
                             </div>
                         </div>
@@ -274,122 +176,81 @@
                     <!-- Sidebar -->
                     <div class="lg:col-span-1">
                         <!-- Categories -->
-                        <div class="bg-white rounded-lg shadow p-6 space-y-6">
-                            <h3 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-3">
-                                <i class="fas fa-list mr-2 text-pink-500"></i>{{ __('Categories') }}
+                        <div class="bg-white rounded-lg shadow-sm p-6 space-y-6">
+                            <h3
+                                class="text-lg font-semibold text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-3">
+                                <i class="fas fa-list text-pink-500"></i>
+                                {{ __('Categories') }}
                             </h3>
-
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2" for="categories">
-                                    {{ __('Categories') }}
-                                </label>
-                                <select name="categories[]" id="categories" multiple size="10"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    @foreach ($categories as $category)
-                                        <option value="{{ $category->id }}"
-                                            {{ in_array($category->id, old('categories', [])) ? 'selected' : '' }}>
-                                            {{ $category->name }}</option>
-                                    @endforeach
-                                </select>
-                                @error('categories')
-                                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                @enderror
+                                <x-form-label for="categories" value="Categories" icon="fas fa-folder" />
+                                <x-select id="categories" name="categories[]" :options="$categories->pluck('name', 'id')->toArray()"
+                                    placeholder="{{ __('Select categories') }}" :selected="old('categories', [])" multiple
+                                    size="10" />
+                                <x-input-error :messages="$errors->get('categories')" class="mt-2" />
                             </div>
                         </div>
 
                         <!-- Price and Stock -->
-                        <div class="bg-white rounded-lg shadow p-6 space-y-6 mt-6">
-                            <h3 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-3">
-                                <i class="fas fa-dollar-sign mr-2 text-yellow-500"></i>{{ __('Price and Stock') }}
+                        <div class="bg-white rounded-lg shadow-sm p-6 space-y-6 mt-6">
+                            <h3
+                                class="text-lg font-semibold text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-3">
+                                <i class="fas fa-dollar-sign text-yellow-500"></i>
+                                {{ __('Price and Stock') }}
                             </h3>
-
-                            <!-- Prices -->
                             <div class="space-y-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2" for="original_price">
-                                        {{ __('Original Price') }}
-                                    </label>
+                                    <x-form-label for="original_price" value="Original Price" icon="fas fa-money-bill" />
                                     <div class="relative">
-                                        <input type="number" name="original_price" id="original_price"
-                                            value="{{ old('original_price') }}" min="0" step="0.01"
-                                            class="w-full px-3 py-2 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            placeholder="0">
+                                        <x-text-input id="original_price" name="original_price" type="number"
+                                            :value="old('original_price')" min="0" step="0.01" placeholder="0" />
                                         <span class="absolute right-3 top-2 text-gray-500">{{ __('VND') }}</span>
                                     </div>
-                                    @error('original_price')
-                                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                    @enderror
+                                    <x-input-error :messages="$errors->get('original_price')" class="mt-2" />
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2" for="sale_price">
-                                        {{ __('Sale Price') }}
-                                    </label>
+                                    <x-form-label for="sale_price" value="Sale Price" icon="fas fa-tag" />
                                     <div class="relative">
-                                        <input type="number" name="sale_price" id="sale_price"
-                                            value="{{ old('sale_price') }}" min="0" step="0.01"
-                                            class="w-full px-3 py-2 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            placeholder="0">
+                                        <x-text-input id="sale_price" name="sale_price" type="number" :value="old('sale_price')"
+                                            min="0" step="0.01" placeholder="0" />
                                         <span class="absolute right-3 top-2 text-gray-500">{{ __('VND') }}</span>
                                     </div>
-                                    @error('sale_price')
-                                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                    @enderror
+                                    <x-input-error :messages="$errors->get('sale_price')" class="mt-2" />
                                 </div>
-                            </div>
-
-                            <!-- Stock -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2" for="stock_quantity">
-                                    {{ __('Stock Quantity') }}
-                                </label>
-                                <input type="number" name="stock_quantity" id="stock_quantity"
-                                    value="{{ old('stock_quantity') }}" min="0"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="{{ __('Enter stock quantity') }}">
-                                @error('stock_quantity')
-                                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                @enderror
+                                <div>
+                                    <x-form-label for="stock_quantity" value="Stock Quantity" icon="fas fa-warehouse" />
+                                    <x-text-input id="stock_quantity" name="stock_quantity" type="number"
+                                        :value="old('stock_quantity')" min="0"
+                                        placeholder="{{ __('Enter stock quantity') }}" />
+                                    <x-input-error :messages="$errors->get('stock_quantity')" class="mt-2" />
+                                </div>
                             </div>
                         </div>
 
                         <!-- Status -->
-                        <div class="bg-white rounded-lg shadow p-6 space-y-6 mt-6">
-                            <h3 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-3">
-                                <i class="fas fa-toggle-on mr-2 text-purple-500"></i>{{ __('Status') }}
+                        <div class="bg-white rounded-lg shadow-sm p-6 space-y-6 mt-6">
+                            <h3
+                                class="text-lg font-semibold text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-3">
+                                <i class="fas fa-toggle-on text-purple-500"></i>
+                                {{ __('Status') }}
                             </h3>
-
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2" for="status">
-                                    {{ __('Book Status') }}
-                                </label>
-                                <select name="status" id="status"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    <option value="">{{ __('Select status') }}</option>
-                                    @foreach ($statuses as $key => $label)
-                                        <option value="{{ $key }}"
-                                            {{ old('status') === $key ? 'selected' : '' }}>
-                                            {{ $label }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('status')
-                                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                @enderror
+                                <x-form-label for="status" value="Book Status" icon="fas fa-info-circle" />
+                                <x-select id="status" name="status" :options="$statuses"
+                                    placeholder="{{ __('Select status') }}" :selected="old('status')" />
+                                <x-input-error :messages="$errors->get('status')" class="mt-2" />
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Submit Buttons -->
-                <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
-                    <a href="{{ route('books.index') }}"
-                        class="px-6 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors duration-200">
-                        <i class="fas fa-times mr-2"></i>{{ __('Cancel') }}
-                    </a>
-                    <button type="submit"
-                        class="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors duration-200">
-                        <i class="fas fa-plus mr-2"></i>{{ __('Add Book') }}
-                    </button>
+                <!-- Form Actions -->
+                <div class="flex items-center gap-4 pt-6 border-t border-gray-100">
+                    <x-primary-button>
+                        <i class="fas fa-save mr-2"></i>
+                        {{ __('Add Book') }}
+                    </x-primary-button>
+                    <x-back-button :route="route('books.index')" />
                 </div>
             </form>
         </main>

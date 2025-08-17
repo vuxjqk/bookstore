@@ -13,14 +13,9 @@ class PublisherController extends Controller
      */
     public function index(Request $request)
     {
-        $search = $request->input('search');
-
-        $publishers = Publisher::when($search, function ($query, $search) {
-            return $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%')
-                    ->orWhere('slug', 'like', '%' . $search . '%');
-            });
-        })->latest()->paginate(10)->appends($request->query());
+        $publishers = Publisher::filter($request->all())
+            ->paginate(10)
+            ->appends($request->query());
 
         return view('publishers.index', compact('publishers'));
     }
@@ -39,9 +34,10 @@ class PublisherController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:100|unique:publishers,name',
-            'slug' => 'required|string|max:150|unique:publishers,slug',
-            'description' => 'nullable|string',
+            'name' => 'required|string|max:255|unique:publishers,name',
+            'slug' => 'required|string|max:255|unique:publishers,slug',
+            'email' => 'nullable|string|max:255|unique:publishers,email',
+            'address' => 'nullable|string|max:255',
         ]);
 
         Publisher::create($validated);
@@ -71,9 +67,10 @@ class PublisherController extends Controller
     public function update(Request $request, Publisher $publisher)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:100|unique:publishers,name,' . $publisher->id,
-            'slug' => 'required|string|max:150|unique:publishers,slug,' . $publisher->id,
-            'description' => 'nullable|string',
+            'name' => 'required|string|max:255|unique:publishers,name,' . $publisher->id,
+            'slug' => 'required|string|max:255|unique:publishers,slug,' . $publisher->id,
+            'email' => 'nullable|string|max:255|unique:publishers,email,' . $publisher->id,
+            'address' => 'nullable|string|max:255',
         ]);
 
         $publisher->update($validated);

@@ -12,8 +12,8 @@ class BookUpdateService
     protected function rulesBasicInfo(Book $book)
     {
         return [
-            'title' => 'required|string|max:150|unique:books,title,' . $book->id,
-            'slug' => 'required|string|max:225|unique:books,slug,' . $book->id,
+            'title' => 'required|string|max:255|unique:books,title,' . $book->id,
+            'slug' => 'required|string|max:255|unique:books,slug,' . $book->id,
             'author_id' => 'nullable|exists:authors,id',
             'publisher_id' => 'nullable|exists:publishers,id',
             'isbn' => 'nullable|string|max:50|unique:books,isbn,' . $book->id,
@@ -28,7 +28,7 @@ class BookUpdateService
             'pages' => 'nullable|integer|min:0',
             'dimensions' => 'nullable|string|max:50',
             'weight' => 'nullable|integer|min:0',
-            'publication_year' => 'nullable|digits:4|integer|min:1000|max:' . date('Y'),
+            'publication_year' => 'nullable|integer|between:1901,2155',
             'cover_type' => 'nullable|in:hardcover,paperback',
         ];
     }

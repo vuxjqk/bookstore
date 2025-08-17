@@ -17,7 +17,7 @@ return new class extends Migration
             $table->enum('payment_method', ['cod', 'bank_transfer', 'momo', 'vnpay', 'credit_card']);
             $table->decimal('amount', 15, 2)->default(0);
             $table->enum('payment_status', ['pending', 'completed', 'failed', 'refunded'])->default('pending');
-            $table->timestamp('payment_date')->nullable();
+            $table->timestamp('paid_at')->nullable();
             $table->string('transaction_id')->nullable();
             $table->timestamps();
         });

@@ -30,17 +30,33 @@ class BookController extends Controller
      */
     public function index(Request $request)
     {
-        $filters = [
-            'search' => $request->input('search'),
-            'category' => $request->input('category'),
-            'status' => $request->input('status'),
-        ];
+        $books = Book::with([
+            'categories:id,name',
+            'author:id,name',
+            'publisher:id,name',
+            'firstImage:id,book_id,image_path,alt_text'
+        ])
+            ->filter($request->all())
+            ->paginate(10)
+            ->appends($request->query());
 
-        $books = Book::filter($filters)->latest()->paginate(10)->appends($request->query());
         $categories = Category::all();
         $statuses = $this->bookAttributes->getStatuses();
 
-        return view('books.index', compact('books', 'categories', 'statuses'));
+        $totalBooks = Book::count();
+        $totalAvailable = Book::where('stock_quantity', '>', 0)->count();
+        $totalOutOfStock = Book::where('stock_quantity', '<=', 0)->count();
+        $totalStock = Book::sum('stock_quantity');
+
+        return view('books.index', compact(
+            'books',
+            'categories',
+            'statuses',
+            'totalBooks',
+            'totalAvailable',
+            'totalOutOfStock',
+            'totalStock'
+        ));
     }
 
     /**
@@ -74,8 +90,8 @@ class BookController extends Controller
     {
         $validated = array_filter(
             $request->validate([
-                'title' => 'required|string|max:150|unique:books,title',
-                'slug' => 'required|string|max:225|unique:books,slug',
+                'title' => 'required|string|max:255|unique:books,title',
+                'slug' => 'required|string|max:255|unique:books,slug',
                 'author_id' => 'nullable|exists:authors,id',
                 'publisher_id' => 'nullable|exists:publishers,id',
                 'isbn' => 'nullable|string|max:50|unique:books,isbn',
@@ -84,7 +100,7 @@ class BookController extends Controller
                 'pages' => 'nullable|integer|min:0',
                 'dimensions' => 'nullable|string|max:50',
                 'weight' => 'nullable|integer|min:0',
-                'publication_year' => 'nullable|digits:4|integer|min:1000|max:' . date('Y'),
+                'publication_year' => 'nullable|integer|between:1901,2155',
                 'cover_type' => 'nullable|in:hardcover,paperback',
                 'original_price' => 'nullable|numeric|min:0',
                 'sale_price' => 'nullable|numeric|min:0',
@@ -120,7 +136,7 @@ class BookController extends Controller
 
             return redirect()->route('books.show', $book)->with('success', __('Book created successfully.'));
         } catch (Exception $e) {
-            return redirect()->back()->with('error', $e);
+            return redirect()->back()->with('error', __('An error occurred: ') . $e->getMessage());
         }
     }
 
@@ -129,7 +145,13 @@ class BookController extends Controller
      */
     public function show(Book $book)
     {
-        $book->load(['author', 'publisher', 'categories', 'images']);
+        $book->load([
+            'author:id,name',
+            'publisher:id,name',
+            'categories:id,name',
+            'images:id,book_id,image_path,alt_text'
+        ]);
+
         $coverTypes = $this->bookAttributes->getCoverTypes();
         $statuses = $this->bookAttributes->getStatuses();
 
@@ -199,7 +221,7 @@ class BookController extends Controller
                 break;
 
             default:
-                return redirect()->back()->with('error', $updateType);
+                return redirect()->back()->with('error', __('Invalid update type.'));
                 break;
         }
 

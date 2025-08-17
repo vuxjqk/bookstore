@@ -13,14 +13,9 @@ class CategoryController extends Controller
      */
     public function index(Request $request)
     {
-        $search = $request->input('search');
-
-        $categories = Category::when($search, function ($query, $search) {
-            return $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%')
-                    ->orWhere('slug', 'like', '%' . $search . '%');
-            });
-        })->latest()->paginate(10)->appends($request->query());
+        $categories = Category::filter($request->all())
+            ->paginate(10)
+            ->appends($request->query());
 
         return view('categories.index', compact('categories'));
     }
@@ -39,8 +34,8 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:100|unique:categories,name',
-            'slug' => 'required|string|max:150|unique:categories,slug',
+            'name' => 'required|string|max:255|unique:categories,name',
+            'slug' => 'required|string|max:255|unique:categories,slug',
             'description' => 'nullable|string',
         ]);
 
@@ -71,8 +66,8 @@ class CategoryController extends Controller
     public function update(Request $request, Category $category)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:100|unique:categories,name,' . $category->id,
-            'slug' => 'required|string|max:150|unique:categories,slug,' . $category->id,
+            'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
+            'slug' => 'required|string|max:255|unique:categories,slug,' . $category->id,
             'description' => 'nullable|string',
         ]);
 

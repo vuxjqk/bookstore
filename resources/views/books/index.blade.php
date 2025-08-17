@@ -3,292 +3,223 @@
 @section('title', __('Book Management'))
 
 @section('content')
-    <div class="py-6">
+    <div class="py-8 px-4 sm:px-6 lg:px-8">
         <!-- Breadcrumb -->
-        <nav class="bg-gray-50 px-6 py-3 text-gray-700">
-            <ol class="list-reset flex text-sm">
-                <li><a href="#" class="text-blue-600 hover:text-blue-800">{{ __('Home') }}</a></li>
-                <li><span class="mx-2">/</span></li>
-                <li class="text-gray-500">{{ __('Book Management') }}</li>
-            </ol>
-        </nav>
+        <x-breadcrumb :items="[['label' => 'Home', 'url' => url('/')], ['label' => 'Book Management']]" />
 
         <!-- Main Content Area -->
-        <main class="p-6">
+        <main class="mt-6 bg-gray-50 rounded-xl shadow-sm p-6 sm:p-8">
             <!-- Header -->
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">{{ __('Book Management') }}</h1>
-                    <p class="text-gray-600 mt-1">{{ __('List of all books in the system') }}</p>
+                    <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-book text-blue-500"></i>
+                        {{ __('Book Management') }}
+                    </h1>
+                    <p class="text-gray-600 mt-1 text-sm">{{ __('Manage all books in the system.') }}</p>
                 </div>
-                <div class="flex space-x-3">
+                <div class="flex items-center gap-3">
+                    <x-create-button :route="route('books.create')" :title="__('Add New Book')" />
                     <a href="{{ route('books.export') }}"
-                        class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors duration-200">
-                        <i class="fas fa-download mr-2"></i>{{ __('Export Excel') }}
-                    </a>
-                    <a href="{{ route('books.create') }}"
-                        class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors duration-200">
-                        <i class="fas fa-plus mr-2"></i>{{ __('Add new book') }}
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg shadow-sm transition-colors duration-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                        <i class="fas fa-download"></i>
+                        {{ __('Export Excel') }}
                     </a>
                 </div>
             </div>
 
-            <!-- Filters -->
-            <form class="bg-white rounded-lg shadow p-6 mb-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                    <i class="fas fa-filter mr-2 text-blue-500"></i>{{ __('Filter') }}
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2"
-                            for="search">{{ __('Search') }}</label>
-                        <input type="search" id="search" name="search" value="{{ request('search') }}"
-                            placeholder="{{ __('Book title, slug...') }}"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2"
-                            for="category">{{ __('Category') }}</label>
-                        <input type="search" list="categories" id="category" name="category"
-                            value="{{ request('category') }}"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="{{ __('Select category') }}">
-                        <datalist id="categories">
-                            <option value="">{{ __('All categories') }}</option>
-                            @foreach ($categories as $category)
-                                <option value="{{ $category->name }}">{{ $category->name }}</option>
-                            @endforeach
-                        </datalist>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2"
-                            for="status">{{ __('Status') }}</label>
-                        <select id="status" name="status"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">{{ __('All statuses') }}</option>
-                            @foreach ($statuses as $key => $status)
-                                <option value="{{ $key }}" {{ request('status') === $key ? 'selected' : '' }}>
-                                    {{ $status }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="flex items-end">
-                        <button type="submit"
-                            class="w-full px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors duration-200">
-                            <i class="fas fa-search mr-2"></i>{{ __('Search') }}
-                        </button>
-                    </div>
-                </div>
-            </form>
-
             <!-- Statistics Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                <div class="bg-white rounded-lg shadow p-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <div class="bg-white rounded-lg shadow-sm p-6">
                     <div class="flex items-center">
                         <div class="p-3 bg-blue-100 rounded-lg">
                             <i class="fas fa-book text-blue-600 text-xl"></i>
                         </div>
                         <div class="ml-4">
                             <p class="text-sm text-gray-600">{{ __('Total Books') }}</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ $books->count() }}</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $totalBooks }}</p>
                         </div>
                     </div>
                 </div>
-                <div class="bg-white rounded-lg shadow p-6">
+                <div class="bg-white rounded-lg shadow-sm p-6">
                     <div class="flex items-center">
                         <div class="p-3 bg-green-100 rounded-lg">
                             <i class="fas fa-check-circle text-green-600 text-xl"></i>
                         </div>
                         <div class="ml-4">
                             <p class="text-sm text-gray-600">{{ __('Available') }}</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ $books->where('status', 'available')->count() }}
-                            </p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $totalAvailable }}</p>
                         </div>
                     </div>
                 </div>
-                <div class="bg-white rounded-lg shadow p-6">
+                <div class="bg-white rounded-lg shadow-sm p-6">
                     <div class="flex items-center">
                         <div class="p-3 bg-red-100 rounded-lg">
                             <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
                         </div>
                         <div class="ml-4">
                             <p class="text-sm text-gray-600">{{ __('Out of Stock') }}</p>
-                            <p class="text-2xl font-bold text-gray-900">
-                                {{ $books->where('status', 'out_of_stock')->count() }}</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $totalOutOfStock }}</p>
                         </div>
                     </div>
                 </div>
-                <div class="bg-white rounded-lg shadow p-6">
+                <div class="bg-white rounded-lg shadow-sm p-6">
                     <div class="flex items-center">
                         <div class="p-3 bg-yellow-100 rounded-lg">
                             <i class="fas fa-warehouse text-yellow-600 text-xl"></i>
                         </div>
                         <div class="ml-4">
                             <p class="text-sm text-gray-600">{{ __('Total Stock') }}</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ $books->sum('stock_quantity') }}</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $totalStock }}</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Books Table -->
-            <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900">
-                        <i class="fas fa-list mr-2 text-green-500"></i>{{ __('Book List') }}
-                    </h3>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    <input type="checkbox"
-                                        class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    {{ __('Book Information') }}
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    {{ __('Categories') }}
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    {{ __('Sale Price') }}
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    {{ __('Stock') }}
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    {{ __('Status') }}
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    {{ __('Actions') }}
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach ($books as $book)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <input type="checkbox"
-                                            class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center">
-                                            <div class="h-16 w-12 bg-gray-200 rounded flex items-center justify-center">
-                                                @if ($book->images->first())
-                                                    <img src="{{ asset('storage/' . $book->images->first()->image_path) }}"
-                                                        alt="{{ $book->images->first()->alt_text }}"
-                                                        class="h-full w-full object-cover rounded">
-                                                @else
-                                                    <i class="fas fa-book text-gray-400"></i>
-                                                @endif
-                                            </div>
-                                            <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900">{{ $book->title }}</div>
-                                                <div class="text-sm text-gray-500">
-                                                    {{ __('Auth') }}: {{ $book->author->name ?? 'N/A' }}
-                                                </div>
-                                                <div class="text-sm text-gray-500">
-                                                    {{ __('Pub') }}: {{ $book->publisher->name ?? 'N/A' }}
-                                                </div>
-                                                <div class="text-sm text-gray-500">
-                                                    {{ $book->pages }} {{ __('pages') }} |
-                                                    {{ $book->dimensions }}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap space-y-3">
-                                        @foreach ($book->categories as $category)
-                                            <span
-                                                class="block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                                                {{ $category->name }}
-                                            </span>
-                                        @endforeach
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">
-                                            {{ number_format($book->sale_price) }}₫
-                                        </div>
-                                        @if ($book->original_price > $book->sale_price)
-                                            <div class="text-sm text-gray-500 line-through">
-                                                {{ number_format($book->original_price) }}₫
-                                            </div>
-                                            <div class="text-sm text-red-600">
-                                                -{{ round((($book->original_price - $book->sale_price) / $book->original_price) * 100) }}%
-                                            </div>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">
-                                            {{ $book->stock_quantity }} {{ __('items') }}
-                                        </div>
-                                        @if ($book->stock_quantity < 10 && $book->stock_quantity > 0)
-                                            <div class="text-sm text-yellow-600">
-                                                <i class="fas fa-exclamation-triangle mr-1"></i>{{ __('Low Stock') }}
-                                            </div>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        @switch($book->status)
-                                            @case('available')
-                                                <span
-                                                    class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
-                                                    {{ __('Available') }}
-                                                </span>
-                                            @break
-
-                                            @case('out_of_stock')
-                                                <span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
-                                                    {{ __('Out of Stock') }}
-                                                </span>
-                                            @break
-
-                                            @case('pre_order')
-                                                <span
-                                                    class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
-                                                    {{ __('Pre-order') }}
-                                                </span>
-                                            @break
-
-                                            @case('discontinued')
-                                                <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
-                                                    {{ __('Discontinued') }}
-                                                </span>
-                                            @break
-                                        @endswitch
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div class="flex space-x-2">
-                                            <a href="{{ route('books.show', $book) }}"
-                                                class="text-blue-600 hover:text-blue-900" title="{{ __('Details') }}">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ route('books.edit', $book) }}"
-                                                class="text-yellow-600 hover:text-yellow-900"
-                                                title="{{ __('Edit') }}">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <button onclick="openDeleteModal('{{ route('books.destroy', $book->id) }}')"
-                                                class="text-red-600 hover:text-red-900 delete-btn"
-                                                title="{{ __('Delete') }}">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Pagination -->
-                <div class="bg-white px-6 py-4 border-t border-gray-200">
-                    {{ $books->links() }}
-                </div>
+            <!-- Filters -->
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                    <i class="fas fa-filter text-blue-500"></i>
+                    {{ __('Filter Books') }}
+                </h3>
+                <form class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <x-form-label for="search" value="Search" icon="fas fa-search" />
+                        <x-text-input id="search" name="search" type="search" :value="request('search')"
+                            placeholder="{{ __('Search by book title or slug...') }}" />
+                    </div>
+                    <div>
+                        <x-form-label for="category" value="Category" icon="fas fa-folder" />
+                        <x-select id="category" name="categories[]" :options="$categories->pluck('name', 'id')->toArray()"
+                            placeholder="{{ __('Select category') }}" :selected="request('categories', [])" />
+                    </div>
+                    <div>
+                        <x-form-label for="status" value="Status" icon="fas fa-info-circle" />
+                        <x-select id="status" name="statuses[]" :options="$statuses"
+                            placeholder="{{ __('Select status') }}" :selected="request('statuses')" />
+                    </div>
+                    <div class="flex items-end">
+                        <x-primary-button type="submit">
+                            <i class="fas fa-search mr-2"></i>
+                            {{ __('Search') }}
+                        </x-primary-button>
+                    </div>
+                </form>
             </div>
+
+            <!-- Books Table -->
+            <x-table title="Book List">
+                <x-thead>
+                    <x-tr>
+                        <x-th>
+                            <div class="flex items-center justify-between">
+                                <span>{{ __('Book Information') }}</span>
+                                <x-sortable-column :options="['a_to_z', 'z_to_a']" />
+                            </div>
+                        </x-th>
+                        <x-th>{{ __('Categories') }}</x-th>
+                        <x-th>{{ __('Price') }}</x-th>
+                        <x-th>{{ __('Stock Quantity') }}</x-th>
+                        <x-th>{{ __('Status') }}</x-th>
+                        <x-th>{{ __('Actions') }}</x-th>
+                    </x-tr>
+                </x-thead>
+                <x-tbody>
+                    @foreach ($books as $book)
+                        <x-tr>
+                            <x-td>
+                                <div class="flex items-center gap-4">
+                                    <div class="h-16 w-12 bg-gray-200 rounded flex items-center justify-center">
+                                        @if ($book->firstImage)
+                                            <img src="{{ asset('storage/' . $book->firstImage->image_path) }}"
+                                                alt="{{ $book->firstImage->alt_text }}"
+                                                class="h-full w-full object-cover rounded">
+                                        @else
+                                            <i class="fas fa-book text-gray-400"></i>
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <div class="text-lg font-medium">{{ Str::limit($book->title, 15, '...') }}</div>
+                                        <div class="text-sm">{{ $book->author->name ?? __('N/A') }}</div>
+                                        <div class="text-sm">{{ $book->publisher->name ?? __('N/A') }}</div>
+                                    </div>
+                                </div>
+                            </x-td>
+                            <x-td>
+                                <div class="flex flex-col gap-2">
+                                    @foreach ($book->categories as $category)
+                                        <span
+                                            class="block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                                            {{ $category->name }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            </x-td>
+                            <x-td>
+                                <div class="flex flex-col">
+                                    <span class="font-medium">{{ number_format($book->original_price) }}₫</span>
+                                    <span class="line-through">{{ number_format($book->sale_price) }}₫</span>
+                                    @if ($book->original_price > $book->sale_price)
+                                        <span class="text-sm text-red-600">
+                                            -{{ round((($book->original_price - $book->sale_price) / $book->original_price) * 100) }}%
+                                        </span>
+                                    @endif
+                                </div>
+                            </x-td>
+                            <x-td>
+                                <div>{{ $book->stock_quantity }} {{ __('items') }}</div>
+                                @if ($book->stock_quantity < 10 && $book->stock_quantity > 0)
+                                    <div class="text-sm text-yellow-600">
+                                        <i class="fas fa-exclamation-triangle mr-1"></i>{{ __('Low Stock') }}
+                                    </div>
+                                @endif
+                            </x-td>
+                            <x-td>
+                                @switch($book->status)
+                                    @case('available')
+                                        <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                                            {{ __('Available') }}
+                                        </span>
+                                    @break
+
+                                    @case('out_of_stock')
+                                        <span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
+                                            {{ __('Out of Stock') }}
+                                        </span>
+                                    @break
+
+                                    @case('pre_order')
+                                        <span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
+                                            {{ __('Pre-order') }}
+                                        </span>
+                                    @break
+
+                                    @case('discontinued')
+                                        <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
+                                            {{ __('Discontinued') }}
+                                        </span>
+                                    @break
+                                @endswitch
+                            </x-td>
+                            <x-td>
+                                <div class="flex items-center gap-2">
+                                    <x-show-button :route="route('books.show', $book)" />
+                                    <x-edit-button :route="route('books.edit', $book)" />
+                                    <x-delete-button :route="route('books.destroy', $book)" />
+                                </div>
+                            </x-td>
+                        </x-tr>
+                    @endforeach
+                </x-tbody>
+            </x-table>
+
+            <!-- Pagination -->
+            <div class="mt-6 bg-white rounded-lg shadow-sm p-6">
+                {{ $books->links() }}
+            </div>
+
+            <!-- Delete Modal -->
+            <x-delete-modal />
         </main>
     </div>
 @endsection

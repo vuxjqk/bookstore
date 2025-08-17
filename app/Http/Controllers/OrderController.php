@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
 use Exception;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -16,9 +17,26 @@ class OrderController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $query = Order::query();
+
+        if ($request->has('include_deleted') && $request->boolean('include_deleted')) {
+            $query = $query->withTrashed();
+        }
+
+        $orders = $query->filter($request->all())
+            ->paginate(10)
+            ->appends($request->query());
+
+        $statistics = [
+            'totalOrders'     => Order::count(),
+            'totalProcessing' => Order::where('status', 'processing')->count(),
+            'totalShipping'   => Order::where('status', 'shipping')->count(),
+            'totalCompleted'  => Order::where('status', 'completed')->count(),
+        ];
+
+        return view('orders.index', compact('orders') + $statistics);
     }
 
     /**
@@ -41,8 +59,8 @@ class OrderController extends Controller
         }
 
         $validated = $request->validate([
-            'name' => 'required|string|max:100',
-            'phone' => ['required', 'string', 'regex:/^(?:\+84|0)(3[2-9]|7[0|6-9]|8[1-9]|9[0-9])[0-9]{7}$/', 'max:20'],
+            'customer_name' => 'required|string|max:100',
+            'customer_phone' => ['required', 'string', 'regex:/^(?:\+84|0)(3[2-9]|7[0|6-9]|8[1-9]|9[0-9])[0-9]{7}$/', 'max:20'],
             'shipping_address' => 'required|string|max:255',
             'payment_method' => 'required|in:cod,bank_transfer,momo,vnpay,credit_card',
             'save_phone' => 'nullable|boolean',
@@ -66,7 +84,7 @@ class OrderController extends Controller
                 if ($user && ($validated['save_phone'] || $validated['save_address'])) {
                     $updates = [];
                     if ($validated['save_phone']) {
-                        $updates['phone'] = $validated['phone'];
+                        $updates['customer_phone'] = $validated['customer_phone'];
                     }
                     if ($validated['save_address']) {
                         $updates['address'] = $validated['shipping_address'];
@@ -76,8 +94,8 @@ class OrderController extends Controller
 
                 $order = Order::create([
                     'user_id' => Auth::id(),
-                    'name' => $validated['name'],
-                    'phone' => $validated['phone'],
+                    'customer_name' => $validated['customer_name'],
+                    'customer_phone' => $validated['customer_phone'],
                     'shipping_address' => $validated['shipping_address'],
                     'order_date' => now(),
                     'total_amount' => $total,
@@ -102,7 +120,7 @@ class OrderController extends Controller
                     'payment_method' => $validated['payment_method'],
                     'amount' => $total,
                     'payment_status' => 'pending',
-                    'payment_date' => now(),
+                    'paid_at' => now(),
                     'transaction_id' => null,
                 ]);
 
@@ -120,7 +138,8 @@ class OrderController extends Controller
      */
     public function show(Order $order)
     {
-        //
+        $order->load(['items.book', 'payment']);
+        return view('orders.show', compact('order'));
     }
 
     /**
@@ -136,7 +155,13 @@ class OrderController extends Controller
      */
     public function update(Request $request, Order $order)
     {
-        //
+        $validated = $request->validate([
+            'status' => 'required|in:pending,confirmed,processing,shipping,delivered,completed,cancelled,refunded,failed',
+        ]);
+
+        $order->update($validated);
+
+        return redirect()->back()->with('success', __('Order status updated successfully'));
     }
 
     /**
@@ -144,6 +169,18 @@ class OrderController extends Controller
      */
     public function destroy(Order $order)
     {
-        //
+        try {
+            $order->update([
+                'status' => 'cancelled',
+            ]);
+            $order->delete();
+            return redirect()->back()->with('success', __('Order cancelled successfully.'));
+        } catch (QueryException $e) {
+            $msg = $e->getCode() === '23000'
+                ? __('Cannot delete because it is in use.')
+                : __('An error occurred while deleting: ') . $e->getMessage();
+
+            return redirect()->back()->with('error', $msg);
+        }
     }
 }

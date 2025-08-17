@@ -17,7 +17,13 @@ class BookAttributesService
 
     public function getDimensions()
     {
-        return ['13x20cm', '14x20cm', '16x24cm', '19x27cm', '21x29cm'];
+        return [
+            '13x20cm',
+            '14x20cm',
+            '16x24cm',
+            '19x27cm',
+            '21x29cm'
+        ];
     }
 
     public function getCoverTypes()

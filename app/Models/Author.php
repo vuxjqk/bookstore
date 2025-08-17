@@ -13,8 +13,37 @@ class Author extends Model
         'biography',
     ];
 
+    protected const SORT_OPTIONS = [
+        'a_to_z' => ['name', 'asc'],
+        'z_to_a' => ['name', 'desc']
+    ];
+
     public function books()
     {
         return $this->hasMany(Book::class);
+    }
+
+    public function scopeFilter($query, array $filters)
+    {
+        $query->when(
+            $filters['search'] ?? null,
+            fn($q, $search) =>
+            $q->where(
+                fn($q) =>
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('slug', 'like', "%{$search}%")
+            )
+        );
+
+        $query->when($filters['sort'] ?? null, function ($q) use ($filters) {
+            if (array_key_exists($filters['sort'], self::SORT_OPTIONS)) {
+                [$column, $direction] = self::SORT_OPTIONS[$filters['sort']];
+                $q->orderBy($column, $direction);
+            } else {
+                $q->orderBy('created_at', 'desc');
+            }
+        }, fn($q) => $q->orderBy('created_at', 'desc'));
+
+        return $query;
     }
 }

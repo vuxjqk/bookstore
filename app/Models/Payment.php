@@ -11,7 +11,11 @@ class Payment extends Model
         'payment_method',
         'amount',
         'payment_status',
-        'payment_date',
+        'paid_at',
         'transaction_id',
+    ];
+
+    protected $casts = [
+        'paid_at' => 'datetime',
     ];
 }

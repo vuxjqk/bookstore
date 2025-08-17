@@ -23,6 +23,41 @@
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
     <style>
+        #loadingOverlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+
+        .bouncing-dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            background-color: #2563eb;
+            border-radius: 50%;
+            animation: bounce 1s infinite ease-in-out;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
         .book-image-gallery .thumbnail:hover {
             transform: scale(1.05);
             transition: transform 0.2s ease-in;
@@ -110,11 +145,11 @@
 
 <body class="bg-gray-100 font-figtree antialiased">
     <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div class="flex gap-2">
-            <span class="w-3 h-3 bg-blue-600 rounded-full animate-bounce"></span>
-            <span class="w-3 h-3 bg-blue-600 rounded-full animate-bounce [animation-delay:-.3s]"></span>
-            <span class="w-3 h-3 bg-blue-600 rounded-full animate-bounce [animation-delay:-.6s]"></span>
+    <div id="loadingOverlay">
+        <div class="bouncing-dots">
+            <span class="dot" style="animation-delay: 0s;"></span>
+            <span class="dot" style="animation-delay: 0.3s;"></span>
+            <span class="dot" style="animation-delay: 0.6s;"></span>
         </div>
     </div>
 
@@ -360,7 +395,8 @@
     @vite(['resources/js/app.js'])
     <script>
         window.addEventListener('load', () => {
-            document.getElementById('loadingOverlay').classList.add('hidden');
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.style.display = 'none';
         });
 
         document.addEventListener('DOMContentLoaded', () => {

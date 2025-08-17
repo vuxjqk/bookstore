@@ -13,4 +13,9 @@ class OrderItem extends Model
         'unit_price',
         'subtotal',
     ];
+
+    public function book()
+    {
+        return $this->belongsTo(Book::class);
+    }
 }

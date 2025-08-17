@@ -13,14 +13,9 @@ class AuthorController extends Controller
      */
     public function index(Request $request)
     {
-        $search = $request->input('search');
-
-        $authors = Author::when($search, function ($query, $search) {
-            return $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%')
-                    ->orWhere('slug', 'like', '%' . $search . '%');
-            });
-        })->latest()->paginate(10)->appends($request->query());
+        $authors = Author::filter($request->all())
+            ->paginate(10)
+            ->appends($request->query());
 
         return view('authors.index', compact('authors'));
     }
@@ -39,9 +34,10 @@ class AuthorController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:100|unique:authors,name',
-            'slug' => 'required|string|max:150|unique:authors,slug',
-            'description' => 'nullable|string',
+            'name' => 'required|string|max:255|unique:authors,name',
+            'slug' => 'required|string|max:255|unique:authors,slug',
+            'email' => 'nullable|string|max:255|unique:authors,email',
+            'biography' => 'nullable|string',
         ]);
 
         Author::create($validated);
@@ -71,9 +67,10 @@ class AuthorController extends Controller
     public function update(Request $request, Author $author)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:100|unique:authors,name,' . $author->id,
-            'slug' => 'required|string|max:150|unique:authors,slug,' . $author->id,
-            'description' => 'nullable|string',
+            'name' => 'required|string|max:255|unique:authors,name,' . $author->id,
+            'slug' => 'required|string|max:255|unique:authors,slug,' . $author->id,
+            'email' => 'nullable|string|max:255|unique:authors,email,' . $author->id,
+            'biography' => 'nullable|string',
         ]);
 
         $author->update($validated);

@@ -83,6 +83,8 @@
         </div>
     </div>
 
+    @stack('modals')
+
     <!-- Scripts -->
     @vite(['resources/js/app.js'])
     <script>

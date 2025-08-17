@@ -16,6 +16,14 @@ use App\Http\Controllers\SupplierController;
 use App\Models\Book;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/lang/{locale}', function ($locale) {
+    if (in_array($locale, ['vi', 'en'])) {
+        session()->put('locale', $locale);
+        return redirect()->back()->with('success', __('Language changed'));
+    }
+    return redirect()->back()->with('error', __('Invalid language'));
+})->name('change.locale');
+
 Route::get('/', function () {
     $related_books = Book::inRandomOrder()
         ->take(4)
@@ -60,10 +68,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('authors', AuthorController::class);
         Route::resource('publishers', PublisherController::class);
         Route::resource('suppliers', SupplierController::class);
+
         Route::resource('books', BookController::class);
         Route::get('/books-export', [BookController::class, 'export'])->name('books.export');
 
         Route::get('/orders/index', [OrderController::class, 'index'])->name('orders.index');
+        Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+        Route::get('/orders/{order}/edit', [OrderController::class, 'edit'])->name('orders.edit');
+        Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
+
         Route::resource('settings', BookController::class);
         Route::resource('customers', BookController::class);
         Route::resource('statistics', BookController::class);

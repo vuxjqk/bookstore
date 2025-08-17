@@ -246,6 +246,8 @@
     "Category deleted successfully.": "Thể loại được xoá thành công.",
     "Cannot delete because it is in use.": "Không thể xóa vì đang được sử dụng.",
     "An error occurred while deleting: ": "Đã xảy ra lỗi khi xoá: ",
+    "An error occurred: ": "Đã xảy ra lỗi: ",
+    "Invalid update type.": "Loại cập nhật không hợp lệ.",
     "An error occurred while creating the order: ": "Đã xảy ra lỗi khi tạo đơn hàng: ",
     "Category management": "Quản lý thể loại",
     "Create category": "Tạo thể loại",
@@ -628,5 +630,7 @@
     "Get Started": "Bắt đầu",
     "Browse our vast collection, update your profile, or start adding books to your cart.": "Duyệt qua bộ sưu tập phong phú của chúng tôi, cập nhật hồ sơ của bạn, hoặc bắt đầu thêm sách vào giỏ hàng.",
     "Update Profile": "Cập nhật hồ sơ",
-    "Shop Now": "Mua sắm ngay"
+    "Shop Now": "Mua sắm ngay",
+    "Language changed": "Đã thay đổi ngôn ngữ",
+    "Invalid language": "Ngôn ngữ không hợp lệ"
 }
