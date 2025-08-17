@@ -207,6 +207,7 @@
                                 <x-td>
                                     <div class="flex items-center gap-2">
                                         @if (!$order->trashed())
+                                            <x-export-pdf-button :route="route('invoices.export', $order)" />
                                             <x-show-button :route="route('orders.show', $order)" />
                                             <x-edit-button :route="route('orders.edit', $order)" />
                                             <x-delete-button :route="route('orders.destroy', $order)" />

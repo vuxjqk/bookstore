@@ -24,6 +24,7 @@
                 </div>
                 <div class="flex items-center gap-3">
                     <x-back-button :route="route('orders.index')" />
+                    <x-export-pdf-button :route="route('invoices.export', $order)" />
                     <x-edit-button :route="route('orders.edit', $order)" />
                 </div>
             </div>

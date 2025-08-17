@@ -9,6 +9,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PDFController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublisherController;
 use App\Http\Controllers\ReviewController;
@@ -63,7 +64,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/reviews/store', [ReviewController::class, 'store'])->name('reviews.store');
 
     Route::middleware(['role:admin'])->group(function () {
-        Route::get('dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index');
+        Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
         Route::resource('categories', CategoryController::class);
         Route::resource('authors', AuthorController::class);
         Route::resource('publishers', PublisherController::class);
@@ -72,10 +73,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('books', BookController::class);
         Route::get('/books-export', [BookController::class, 'export'])->name('books.export');
 
-        Route::get('/orders/index', [OrderController::class, 'index'])->name('orders.index');
+        Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
         Route::get('/orders/{order}/edit', [OrderController::class, 'edit'])->name('orders.edit');
         Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
+
+        Route::get('/invoices/{order}/export', [PDFController::class, 'exportInvoice'])->name('invoices.export');
 
         Route::resource('settings', BookController::class);
         Route::resource('customers', BookController::class);
