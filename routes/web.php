@@ -12,6 +12,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PDFController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublisherController;
+use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SupplierController;
 use App\Models\Book;
@@ -75,10 +76,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
-        Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
         Route::put('/orders/{order}', [OrderController::class, 'update'])->name('orders.update');
+        Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
+        Route::get('/orders/{order}/export', [PDFController::class, 'exportOrderInvoice'])->name('orders.export');
 
-        Route::get('/invoices/{order}/export', [PDFController::class, 'exportInvoice'])->name('invoices.export');
+        Route::get('/purchase_orders', [PurchaseOrderController::class, 'index'])->name('purchase_orders.index');
+        Route::get('/purchase_orders/{purchaseOrder}', [PurchaseOrderController::class, 'show'])->name('purchase_orders.show');
+        Route::put('/purchase_orders/{purchaseOrder}', [PurchaseOrderController::class, 'update'])->name('purchase_orders.update');
+        Route::delete('/purchase_orders/{purchaseOrder}', [PurchaseOrderController::class, 'destroy'])->name('purchase_orders.destroy');
+        Route::get('/purchase_orders/{purchaseOrder}/export', [PDFController::class, 'exportPurchaseOrderInvoice'])->name('purchase_orders.export');
 
         Route::resource('settings', BookController::class);
         Route::resource('customers', BookController::class);

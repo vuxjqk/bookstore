@@ -1,11 +1,11 @@
 @extends('layouts.admin')
 
-@section('title', __('Order Management'))
+@section('title', __('Purchase Order Management'))
 
 @section('content')
     <div class="py-8 px-4 sm:px-6 lg:px-8">
         <!-- Breadcrumb -->
-        <x-breadcrumb :items="[['label' => 'Home', 'url' => url('/')], ['label' => 'Order Management']]" />
+        <x-breadcrumb :items="[['label' => 'Home', 'url' => url('/')], ['label' => 'Purchase Order Management']]" />
 
         <!-- Main Content Area -->
         <main class="mt-6 bg-gray-50 rounded-xl shadow-sm p-6 sm:p-8">
@@ -13,10 +13,10 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                        <i class="fas fa-shopping-cart text-blue-500"></i>
-                        {{ __('Order Management') }}
+                        <i class="fas fa-file-invoice text-blue-500"></i>
+                        {{ __('Purchase Order Management') }}
                     </h1>
-                    <p class="text-gray-600 mt-1 text-sm">{{ __('Manage all orders in the system.') }}</p>
+                    <p class="text-gray-600 mt-1 text-sm">{{ __('Manage all purchase orders in the system.') }}</p>
                 </div>
             </div>
 
@@ -25,7 +25,7 @@
                 <div class="bg-white rounded-lg shadow-sm p-6">
                     <div class="flex items-center">
                         <div class="p-3 bg-blue-100 rounded-lg">
-                            <i class="fas fa-shopping-cart text-blue-600 text-xl"></i>
+                            <i class="fas fa-file-invoice text-blue-600 text-xl"></i>
                         </div>
                         <div class="ml-4">
                             <p class="text-sm text-gray-600">{{ __('Total Orders') }}</p>
@@ -36,22 +36,11 @@
                 <div class="bg-white rounded-lg shadow-sm p-6">
                     <div class="flex items-center">
                         <div class="p-3 bg-yellow-100 rounded-lg">
-                            <i class="fas fa-cogs text-yellow-600 text-xl"></i>
+                            <i class="fas fa-hourglass-start text-yellow-600 text-xl"></i>
                         </div>
                         <div class="ml-4">
-                            <p class="text-sm text-gray-600">{{ __('Processing') }}</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ $totalProcessing }}</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-white rounded-lg shadow-sm p-6">
-                    <div class="flex items-center">
-                        <div class="p-3 bg-green-100 rounded-lg">
-                            <i class="fas fa-truck text-green-600 text-xl"></i>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm text-gray-600">{{ __('Shipping') }}</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ $totalShipping }}</p>
+                            <p class="text-sm text-gray-600">{{ __('Pending') }}</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $totalPending }}</p>
                         </div>
                     </div>
                 </div>
@@ -61,8 +50,19 @@
                             <i class="fas fa-check-circle text-blue-600 text-xl"></i>
                         </div>
                         <div class="ml-4">
-                            <p class="text-sm text-gray-600">{{ __('Completed') }}</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ $totalCompleted }}</p>
+                            <p class="text-sm text-gray-600">{{ __('Confirmed') }}</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $totalConfirmed }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-green-100 rounded-lg">
+                            <i class="fas fa-truck-loading text-green-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm text-gray-600">{{ __('Received') }}</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $totalReceived }}</p>
                         </div>
                     </div>
                 </div>
@@ -72,13 +72,13 @@
             <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
                 <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">
                     <i class="fas fa-filter text-blue-500"></i>
-                    {{ __('Filter Orders') }}
+                    {{ __('Filter Purchase Orders') }}
                 </h3>
                 <form class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
-                        <x-form-label for="search" value="Search" icon="fas fa-search" />
-                        <x-text-input id="search" name="search" type="search" :value="request('search')"
-                            placeholder="{{ __('Search by customer name or phone...') }}" />
+                        <x-form-label for="supplier" value="Supplier" icon="fas fa-building" />
+                        <x-select id="supplier" name="suppliers[]" :options="$suppliers->pluck('name', 'id')->toArray()"
+                            placeholder="{{ __('Select supplier') }}" :selected="request('suppliers', [])" />
                     </div>
                     <div>
                         <x-form-label for="order_date" value="Order Date" icon="fas fa-calendar" />
@@ -90,13 +90,8 @@
                         <x-select id="status" name="status" :options="[
                             'pending' => __('Pending'),
                             'confirmed' => __('Confirmed'),
-                            'processing' => __('Processing'),
-                            'shipping' => __('Shipping'),
-                            'delivered' => __('Delivered'),
-                            'completed' => __('Completed'),
+                            'received' => __('Received'),
                             'cancelled' => __('Cancelled'),
-                            'refunded' => __('Refunded'),
-                            'failed' => __('Failed'),
                         ]" placeholder="{{ __('Select status') }}"
                             :selected="request('status')" />
                     </div>
@@ -109,19 +104,19 @@
                 </form>
             </div>
 
-            <!-- Orders Table -->
+            <!-- Purchase Orders Table -->
             <div class="relative">
                 <form id="deleted-orders-form" class="absolute top-4 right-4 flex items-center gap-2">
                     <x-input-choice name="include_deleted" value="1" :label="__('Show deleted orders')" :checked="request('include_deleted')"
                         onchange="document.getElementById('deleted-orders-form').submit();" />
                 </form>
-                <x-table title="Order List">
+                <x-table title="Purchase Order List">
                     <x-thead>
                         <x-tr>
                             <x-th>{{ __('Order ID') }}</x-th>
                             <x-th>
                                 <div class="flex items-center justify-between">
-                                    <span>{{ __('Customer Information') }}</span>
+                                    <span>{{ __('Supplier') }}</span>
                                     <x-sortable-column :options="['a_to_z', 'z_to_a']" />
                                 </div>
                             </x-th>
@@ -139,13 +134,12 @@
                     <x-tbody>
                         @foreach ($orders as $order)
                             <x-tr>
-                                <x-td>{{ $order->id }}</x-td>
                                 <x-td>
-                                    <div class="text-lg font-medium">{{ $order->customer_name }}</div>
-                                    <div class="text-sm">{{ $order->customer_phone }}</div>
-                                    <div class="text-sm">{{ $order->shipping_address }}</div>
+                                    <div class="text-lg font-medium">{{ $order->id }}</div>
+                                    <div class="text-sm">{{ $order->purchase_order_code }}</div>
                                 </x-td>
-                                <x-td>{{ $order->order_date->format('d-m-Y') }}</x-td>
+                                <x-td>{{ $order->supplier->name ?? __('N/A') }}</x-td>
+                                <x-td>{{ $order->order_date->format('Y-m-d') }}</x-td>
                                 <x-td>{{ number_format($order->total_amount) }} {{ __('VND') }}</x-td>
                                 <x-td>
                                     @switch($order->status)
@@ -161,27 +155,9 @@
                                             </span>
                                         @break
 
-                                        @case('processing')
-                                            <span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
-                                                {{ __('Processing') }}
-                                            </span>
-                                        @break
-
-                                        @case('shipping')
+                                        @case('received')
                                             <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
-                                                {{ __('Shipping') }}
-                                            </span>
-                                        @break
-
-                                        @case('delivered')
-                                            <span class="px-2 py-1 text-xs font-medium bg-teal-100 text-teal-800 rounded-full">
-                                                {{ __('Delivered') }}
-                                            </span>
-                                        @break
-
-                                        @case('completed')
-                                            <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                                                {{ __('Completed') }}
+                                                {{ __('Received') }}
                                             </span>
                                         @break
 
@@ -190,29 +166,17 @@
                                                 {{ __('Cancelled') }}
                                             </span>
                                         @break
-
-                                        @case('refunded')
-                                            <span class="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded-full">
-                                                {{ __('Refunded') }}
-                                            </span>
-                                        @break
-
-                                        @case('failed')
-                                            <span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
-                                                {{ __('Failed') }}
-                                            </span>
-                                        @break
                                     @endswitch
                                 </x-td>
                                 <x-td>
                                     <div class="flex items-center gap-2">
                                         @if (!$order->trashed())
-                                            <x-export-pdf-button :route="route('orders.export', $order)" />
-                                            <x-show-button :route="route('orders.show', $order)" />
-                                            <x-status-update-button :route="route('orders.update', $order)" />
-                                            <x-delete-button :route="route('orders.destroy', $order)" />
+                                            <x-export-pdf-button :route="route('purchase_orders.export', $order)" />
+                                            <x-show-button :route="route('purchase_orders.show', $order)" />
+                                            <x-status-update-button :route="route('purchase_orders.update', $order)" />
+                                            <x-delete-button :route="route('purchase_orders.destroy', $order)" />
                                         @else
-                                            <x-restore-button :route="route('orders.destroy', $order)" />
+                                            <x-restore-button :route="route('purchase_orders.destroy', $order)" />
                                         @endif
                                     </div>
                                 </x-td>
@@ -229,7 +193,7 @@
 
             <!-- Status Update Modal -->
             <x-status-update-modal />
-            <!-- Delete Modal -->
+            <!-- Delete/Restore Modal -->
             <x-delete-modal />
         </main>
     </div>

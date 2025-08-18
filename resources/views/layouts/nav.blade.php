@@ -34,7 +34,21 @@
         <div class="px-6 py-2 mt-4">
             <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wide">{{ __('Management') }}</h2>
         </div>
-        @foreach ([['route' => 'books.index', 'icon' => 'fa-book', 'label' => __('Books'), 'routeMatch' => 'books.*'], ['route' => 'categories.index', 'icon' => 'fa-list', 'label' => __('Categories'), 'routeMatch' => 'categories.*'], ['route' => 'authors.index', 'icon' => 'fa-user-edit', 'label' => __('Authors'), 'routeMatch' => 'authors.*'], ['route' => 'publishers.index', 'icon' => 'fa-building', 'label' => __('Publishers'), 'routeMatch' => 'publishers.*'], ['route' => 'suppliers.index', 'icon' => 'fa-university', 'label' => __('Suppliers'), 'routeMatch' => 'suppliers.*'], ['route' => 'orders.index', 'icon' => 'fa-shopping-cart', 'label' => __('Orders'), 'routeMatch' => 'orders.*'], ['route' => 'customers.index', 'icon' => 'fa-users', 'label' => __('Customers'), 'routeMatch' => 'customers.*']] as $item)
+        @foreach ([
+        [
+            'route' => 'books.index',
+            'icon' => 'fa-book',
+            'label' => __('Books'),
+            'routeMatch' => 'books.*',
+        ],
+        ['route' => 'categories.index', 'icon' => 'fa-list', 'label' => __('Categories'), 'routeMatch' => 'categories.*'],
+        ['route' => 'authors.index', 'icon' => 'fa-user-edit', 'label' => __('Authors'), 'routeMatch' => 'authors.*'],
+        ['route' => 'publishers.index', 'icon' => 'fa-building', 'label' => __('Publishers'), 'routeMatch' => 'publishers.*'],
+        ['route' => 'suppliers.index', 'icon' => 'fa-university', 'label' => __('Suppliers'), 'routeMatch' => 'suppliers.*'],
+        ['route' => 'orders.index', 'icon' => 'fa-shopping-cart', 'label' => __('Orders'), 'routeMatch' => 'orders.*'],
+        ['route' => 'customers.index', 'icon' => 'fa-users', 'label' => __('Customers'), 'routeMatch' => 'customers.*'],
+        ['route' => 'purchase_orders.index', 'icon' => 'fa-file-invoice', 'label' => __('Purchase Orders'), 'routeMatch' => 'purchase_orders.*'],
+    ] as $item)
             <a href="{{ route($item['route']) }}"
                 class="{{ request()->routeIs($item['routeMatch']) ? $active : $inactive }}"
                 aria-current="{{ request()->routeIs($item['routeMatch']) ? 'page' : 'false' }}">
@@ -47,7 +61,20 @@
         <div class="px-6 py-2 mt-4">
             <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wide">{{ __('Reports') }}</h2>
         </div>
-        @foreach ([['route' => 'statistics.index', 'icon' => 'fa-chart-bar', 'label' => __('Statistics'), 'routeMatch' => 'statistics.*'], ['route' => 'reports.index', 'icon' => 'fa-file-alt', 'label' => __('Reports'), 'routeMatch' => 'reports.*']] as $item)
+        @foreach ([
+        [
+            'route' => 'statistics.index',
+            'icon' => 'fa-chart-bar',
+            'label' => __('Statistics'),
+            'routeMatch' => 'statistics.*',
+        ],
+        [
+            'route' => 'reports.index',
+            'icon' => 'fa-file-alt',
+            'label' => __('Reports'),
+            'routeMatch' => 'reports.*',
+        ],
+    ] as $item)
             <a href="{{ route($item['route']) }}"
                 class="{{ request()->routeIs($item['routeMatch']) ? $active : $inactive }}"
                 aria-current="{{ request()->routeIs($item['routeMatch']) ? 'page' : 'false' }}">
@@ -60,7 +87,20 @@
         <div class="px-6 py-2 mt-4">
             <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wide">{{ __('Settings') }}</h2>
         </div>
-        @foreach ([['route' => 'system.index', 'icon' => 'fa-cog', 'label' => __('System'), 'routeMatch' => 'system.*'], ['route' => 'permissions.index', 'icon' => 'fa-shield-alt', 'label' => __('Permissions'), 'routeMatch' => 'permissions.*']] as $item)
+        @foreach ([
+        [
+            'route' => 'system.index',
+            'icon' => 'fa-cog',
+            'label' => __('System'),
+            'routeMatch' => 'system.*',
+        ],
+        [
+            'route' => 'permissions.index',
+            'icon' => 'fa-shield-alt',
+            'label' => __('Permissions'),
+            'routeMatch' => 'permissions.*',
+        ],
+    ] as $item)
             <a href="{{ route($item['route']) }}"
                 class="{{ request()->routeIs($item['routeMatch']) ? $active : $inactive }}"
                 aria-current="{{ request()->routeIs($item['routeMatch']) ? 'page' : 'false' }}">

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->decimal('total_amount', 15, 2)->default(0);
             $table->enum('status', ['pending', 'confirmed', 'received', 'cancelled'])->default('pending');
             $table->text('notes')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

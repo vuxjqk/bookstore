@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ __('Book Invoice') }}</title>
+    <title>{{ __('Purchase Order Invoice') }}</title>
     <style>
         @page {
             size: A4;
@@ -84,14 +84,14 @@
             font-weight: bold;
         }
 
-        .customer-info {
+        .supplier-info {
             display: flex;
             justify-content: space-between;
             margin-bottom: 30px;
             gap: 40px;
         }
 
-        .customer-details,
+        .supplier-details,
         .order-details {
             flex: 1;
             border: 1px solid #ddd;
@@ -99,7 +99,7 @@
             background-color: #f9f9f9;
         }
 
-        .customer-details h3,
+        .supplier-details h3,
         .order-details h3 {
             font-size: 14px;
             margin-bottom: 10px;
@@ -240,31 +240,31 @@
             </div>
 
             <div class="invoice-title">
-                <h1>{{ __('BOOK INVOICE') }}</h1>
+                <h1>{{ __('PURCHASE ORDER INVOICE') }}</h1>
                 <div class="invoice-number">{{ __('No') }}:
-                    {{ 'HD-' . date('Y') . '-' . str_pad($order->id, 3, '0', STR_PAD_LEFT) }}</div>
+                    {{ 'PO-' . date('Y') . '-' . str_pad($order->id, 3, '0', STR_PAD_LEFT) }}</div>
             </div>
         </div>
 
-        <!-- Customer Information -->
-        <div class="customer-info">
-            <div class="customer-details">
-                <h3>{{ __('CUSTOMER INFORMATION') }}</h3>
+        <!-- Supplier Information -->
+        <div class="supplier-info">
+            <div class="supplier-details">
+                <h3>{{ __('SUPPLIER INFORMATION') }}</h3>
                 <div class="info-row">
                     <span class="info-label">{{ __('Name') }}:</span>
-                    <span>{{ $order->customer_name }}</span>
+                    <span>{{ $order->supplier->name ?? __('N/A') }}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">{{ __('Email') }}:</span>
-                    <span>{{ $order->user->email ?? __('N/A') }}</span>
+                    <span>{{ $order->supplier->email ?? __('N/A') }}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">{{ __('Phone') }}:</span>
-                    <span>{{ $order->customer_phone }}</span>
+                    <span>{{ $order->supplier->phone ?? __('N/A') }}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">{{ __('Address') }}:</span>
-                    <span>{{ $order->shipping_address }}</span>
+                    <span>{{ $order->supplier->address ?? __('N/A') }}</span>
                 </div>
             </div>
 
@@ -275,8 +275,8 @@
                     <span>{{ $order->order_date->format('d/m/Y') }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">{{ __('Order ID') }}:</span>
-                    <span>{{ 'ORD-' . date('Y') . '-' . str_pad($order->id, 3, '0', STR_PAD_LEFT) }}</span>
+                    <span class="info-label">{{ __('Order Code') }}:</span>
+                    <span>{{ $order->purchase_order_code }}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">{{ __('Status') }}:</span>
@@ -290,71 +290,25 @@
                                 {{ __('Confirmed') }}
                             @break
 
-                            @case('processing')
-                                {{ __('Processing') }}
-                            @break
-
-                            @case('shipping')
-                                {{ __('Shipping') }}
-                            @break
-
-                            @case('delivered')
-                                {{ __('Delivered') }}
-                            @break
-
-                            @case('completed')
-                                {{ __('Completed') }}
+                            @case('received')
+                                {{ __('Received') }}
                             @break
 
                             @case('cancelled')
                                 {{ __('Cancelled') }}
                             @break
 
-                            @case('refunded')
-                                {{ __('Refunded') }}
-                            @break
-
-                            @case('failed')
-                                {{ __('Failed') }}
-                            @break
-
                             @default
                                 {{ __('N/A') }}
                         @endswitch
+                        @if ($order->trashed())
+                            ({{ __('Deleted') }})
+                        @endif
                     </span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">{{ __('Payment') }}:</span>
-                    <span>
-                        @if ($order->payment)
-                            @switch($order->payment->payment_method)
-                                @case('cod')
-                                    {{ __('Cash on Delivery') }}
-                                @break
-
-                                @case('bank_transfer')
-                                    {{ __('Bank Transfer') }}
-                                @break
-
-                                @case('momo')
-                                    {{ __('MoMo') }}
-                                @break
-
-                                @case('vnpay')
-                                    {{ __('VNPay') }}
-                                @break
-
-                                @case('credit_card')
-                                    {{ __('Credit Card') }}
-                                @break
-
-                                @default
-                                    {{ __('N/A') }}
-                            @endswitch
-                        @else
-                            {{ __('N/A') }}
-                        @endif
-                    </span>
+                    <span class="info-label">{{ __('Notes') }}:</span>
+                    <span>{{ $order->notes ?? __('N/A') }}</span>
                 </div>
             </div>
         </div>
@@ -400,14 +354,6 @@
                     <td class="text-right">{{ number_format($order->items->sum('subtotal')) }} ₫</td>
                 </tr>
                 <tr>
-                    <td class="label">{{ __('Shipping Fee') }}:</td>
-                    <td class="text-right">{{ number_format(30000) }} ₫</td>
-                </tr>
-                <tr>
-                    <td class="label">{{ __('Discount') }}:</td>
-                    <td class="text-right">{{ number_format(-25000) }} ₫</td>
-                </tr>
-                <tr>
                     <td class="label">{{ __('VAT (10%)') }}:</td>
                     <td class="text-right">{{ number_format($order->items->sum('subtotal') * 0.1) }} ₫</td>
                 </tr>
@@ -423,13 +369,13 @@
             <div class="notes">
                 <h4>{{ __('NOTES') }}</h4>
                 <p>{{ __('- This invoice serves as proof of purchase.') }}</p>
-                <p>{{ __('- Please check the items upon receipt.') }}</p>
-                <p>{{ __('- Returns accepted within 7 days for defective books.') }}</p>
-                <p>{{ __('- Thank you for trusting and supporting our store!') }}</p>
+                <p>{{ __('- Please verify items upon receipt.') }}</p>
+                <p>{{ __('- Contact us for any discrepancies within 7 days.') }}</p>
+                <p>{{ __('- Thank you for your business!') }}</p>
             </div>
 
             <div class="signature">
-                <h4>{{ __('SELLER SIGNATURE') }}</h4>
+                <h4>{{ __('BUYER SIGNATURE') }}</h4>
                 <div class="signature-box">
                     {{ __('(Sign and stamp)') }}
                 </div>
@@ -441,7 +387,7 @@
         </div>
 
         <div class="thank-you">
-            <strong>{{ __('Thank you for your purchase! See you again!') }}</strong>
+            <strong>{{ __('Thank you for your cooperation!') }}</strong>
         </div>
     </div>
 </body>
