@@ -33,7 +33,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        DB::statement("
+        DB::unprepared("
             CREATE TRIGGER update_book_status
             BEFORE UPDATE ON books
             FOR EACH ROW
@@ -54,7 +54,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement('DROP TRIGGER IF EXISTS update_book_status');
+        DB::unprepared('DROP TRIGGER IF EXISTS update_book_status');
         Schema::dropIfExists('books');
     }
 };

@@ -8,6 +8,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\InventoryTransactionController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PDFController;
 use App\Http\Controllers\ProfileController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\PublisherController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\UserController;
 use App\Models\Book;
 use Illuminate\Support\Facades\Route;
 
@@ -86,8 +88,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/purchase_orders/{purchaseOrder}', [PurchaseOrderController::class, 'destroy'])->name('purchase_orders.destroy');
         Route::get('/purchase_orders/{purchaseOrder}/export', [PDFController::class, 'exportPurchaseOrderInvoice'])->name('purchase_orders.export');
 
+        Route::get('/inventory_transactions', [InventoryTransactionController::class, 'index'])->name('inventory_transactions.index');
+
+        Route::resource('users', UserController::class);
+
         Route::resource('settings', BookController::class);
-        Route::resource('customers', BookController::class);
         Route::resource('statistics', BookController::class);
         Route::resource('reports', BookController::class);
         Route::resource('system', BookController::class);

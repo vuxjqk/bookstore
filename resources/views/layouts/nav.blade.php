@@ -44,10 +44,11 @@
         ['route' => 'categories.index', 'icon' => 'fa-list', 'label' => __('Categories'), 'routeMatch' => 'categories.*'],
         ['route' => 'authors.index', 'icon' => 'fa-user-edit', 'label' => __('Authors'), 'routeMatch' => 'authors.*'],
         ['route' => 'publishers.index', 'icon' => 'fa-building', 'label' => __('Publishers'), 'routeMatch' => 'publishers.*'],
-        ['route' => 'suppliers.index', 'icon' => 'fa-university', 'label' => __('Suppliers'), 'routeMatch' => 'suppliers.*'],
         ['route' => 'orders.index', 'icon' => 'fa-shopping-cart', 'label' => __('Orders'), 'routeMatch' => 'orders.*'],
-        ['route' => 'customers.index', 'icon' => 'fa-users', 'label' => __('Customers'), 'routeMatch' => 'customers.*'],
+        ['route' => 'suppliers.index', 'icon' => 'fa-university', 'label' => __('Suppliers'), 'routeMatch' => 'suppliers.*'],
         ['route' => 'purchase_orders.index', 'icon' => 'fa-file-invoice', 'label' => __('Purchase Orders'), 'routeMatch' => 'purchase_orders.*'],
+        ['route' => 'inventory_transactions.index', 'icon' => 'fa-warehouse', 'label' => __('Inventory Transactions'), 'routeMatch' => 'inventory_transactions.*'],
+        ['route' => 'users.index', 'icon' => 'fa-users', 'label' => __('Users'), 'routeMatch' => 'users.*'],
     ] as $item)
             <a href="{{ route($item['route']) }}"
                 class="{{ request()->routeIs($item['routeMatch']) ? $active : $inactive }}"

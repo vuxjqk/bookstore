@@ -75,6 +75,9 @@
                     {{ __('Filter Orders') }}
                 </h3>
                 <form class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    @if (request('include_deleted'))
+                        <input type="hidden" name="include_deleted" value="{{ request('include_deleted') }}">
+                    @endif
                     <div>
                         <x-form-label for="search" value="Search" icon="fas fa-search" />
                         <x-text-input id="search" name="search" type="search" :value="request('search')"

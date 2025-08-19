@@ -242,7 +242,7 @@
             <div class="invoice-title">
                 <h1>{{ __('ORDER INVOICE') }}</h1>
                 <div class="invoice-number">{{ __('No') }}:
-                    {{ 'HD-' . date('Y') . '-' . str_pad($order->id, 3, '0', STR_PAD_LEFT) }}</div>
+                    {{ 'SO-' . date('Y') . '-' . str_pad($order->id, 3, '0', STR_PAD_LEFT) }}</div>
             </div>
         </div>
 

@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('address')->nullable();
             $table->unique(['provider', 'provider_id']);
             $table->rememberToken();
+            $table->softDeletes();
             $table->timestamps();
         });
 

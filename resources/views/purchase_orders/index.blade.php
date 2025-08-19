@@ -75,6 +75,9 @@
                     {{ __('Filter Purchase Orders') }}
                 </h3>
                 <form class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    @if (request('include_deleted'))
+                        <input type="hidden" name="include_deleted" value="{{ request('include_deleted') }}">
+                    @endif
                     <div>
                         <x-form-label for="supplier" value="Supplier" icon="fas fa-building" />
                         <x-select id="supplier" name="suppliers[]" :options="$suppliers->pluck('name', 'id')->toArray()"
@@ -138,7 +141,7 @@
                                     <div class="text-lg font-medium">{{ $order->id }}</div>
                                     <div class="text-sm">{{ $order->purchase_order_code }}</div>
                                 </x-td>
-                                <x-td>{{ $order->supplier->name ?? __('N/A') }}</x-td>
+                                <x-td>{{ Str::limit($order->supplier->name ?? __('N/A'), 15, '...') }}</x-td>
                                 <x-td>{{ $order->order_date->format('Y-m-d') }}</x-td>
                                 <x-td>{{ number_format($order->total_amount) }} {{ __('VND') }}</x-td>
                                 <x-td>

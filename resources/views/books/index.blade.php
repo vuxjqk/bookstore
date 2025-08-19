@@ -91,7 +91,7 @@
                     <div>
                         <x-form-label for="category" value="Category" icon="fas fa-folder" />
                         <x-select id="category" name="categories[]" :options="$categories->pluck('name', 'id')->toArray()"
-                            placeholder="{{ __('Select category') }}" :selected="request('categories', [])" />
+                            placeholder="{{ __('Select category') }}" :selected="request('categories')" />
                     </div>
                     <div>
                         <x-form-label for="status" value="Status" icon="fas fa-info-circle" />

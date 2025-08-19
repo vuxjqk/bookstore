@@ -10,9 +10,28 @@ class InventoryTransactionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $transactions = InventoryTransaction::with([
+            'purchase_order_item.book',
+            'order_item.book'
+        ])
+            ->filter($request->all())
+            ->paginate(10)
+            ->appends($request->query());
+
+        $totalTransactions = InventoryTransaction::count();
+        $totalIncoming = InventoryTransaction::where('transaction_type', 'in')->sum('quantity');
+        $totalOutgoing = InventoryTransaction::where('transaction_type', 'out')->sum('quantity');
+        $netStockChange = $totalIncoming - $totalOutgoing;
+
+        return view('inventory_transactions.index', compact(
+            'transactions',
+            'totalTransactions',
+            'totalIncoming',
+            'totalOutgoing',
+            'netStockChange'
+        ));
     }
 
     /**

@@ -42,7 +42,7 @@
                                     {{ __('Basic Information') }}
                                 </h3>
                                 <button type="submit" name="update_type" value="basic_info"
-                                    class="flex items-center justify-center bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-lg transition-colors duration-200"
+                                    class="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 text-white p-2 rounded-lg transition-colors duration-200"
                                     title="{{ __('Update') }}">
                                     <i class="fas fa-edit"></i>
                                 </button>
@@ -113,7 +113,7 @@
                                     {{ __('Technical Details') }}
                                 </h3>
                                 <button type="submit" name="update_type" value="technical"
-                                    class="flex items-center justify-center bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-lg transition-colors duration-200"
+                                    class="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 text-white p-2 rounded-lg transition-colors duration-200"
                                     title="{{ __('Update') }}">
                                     <i class="fas fa-edit"></i>
                                 </button>
@@ -168,7 +168,7 @@
                                     {{ __('Book Images') }}
                                 </h3>
                                 <button type="submit" name="update_type" value="images"
-                                    class="flex items-center justify-center bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-lg transition-colors duration-200"
+                                    class="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 text-white p-2 rounded-lg transition-colors duration-200"
                                     title="{{ __('Update') }}">
                                     <i class="fas fa-edit"></i>
                                 </button>
@@ -204,7 +204,7 @@
                                     {{ __('Categories') }}
                                 </h3>
                                 <button type="submit" name="update_type" value="categories"
-                                    class="flex items-center justify-center bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-lg transition-colors duration-200"
+                                    class="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 text-white p-2 rounded-lg transition-colors duration-200"
                                     title="{{ __('Update') }}">
                                     <i class="fas fa-edit"></i>
                                 </button>
@@ -226,7 +226,7 @@
                                     {{ __('Price and Stock') }}
                                 </h3>
                                 <button type="submit" name="update_type" value="price_stock"
-                                    class="flex items-center justify-center bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-lg transition-colors duration-200"
+                                    class="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 text-white p-2 rounded-lg transition-colors duration-200"
                                     title="{{ __('Update') }}">
                                     <i class="fas fa-edit"></i>
                                 </button>
@@ -270,7 +270,7 @@
                                     {{ __('Status') }}
                                 </h3>
                                 <button type="submit" name="update_type" value="status"
-                                    class="flex items-center justify-center bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-lg transition-colors duration-200"
+                                    class="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 text-white p-2 rounded-lg transition-colors duration-200"
                                     title="{{ __('Update') }}">
                                     <i class="fas fa-edit"></i>
                                 </button>

@@ -12,9 +12,24 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $users = User::filter($request->all())
+            ->paginate(10)
+            ->appends($request->query());
+
+        $totalUsers = User::count();
+        $totalAdmins = User::count();
+        $totalSellers = User::count();
+        $totalCustomers = User::count();
+
+        return view('users.index', compact(
+            'users',
+            'totalUsers',
+            'totalAdmins',
+            'totalSellers',
+            'totalCustomers'
+        ));
     }
 
     /**

@@ -22,8 +22,9 @@
                     </h1>
                     <p class="text-gray-600 mt-1 text-sm">{{ __('Update the details of the supplier.') }}</p>
                 </div>
-                <div>
+                <div class="flex items-center gap-3">
                     <x-back-button :route="route('suppliers.index')" />
+                    <x-show-button :route="route('suppliers.show', $supplier)" />
                 </div>
             </div>
 
