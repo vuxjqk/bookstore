@@ -25,7 +25,8 @@
                 <div class="flex items-center gap-3">
                     <x-back-button :route="route('orders.index')" />
                     <x-export-pdf-button :route="route('orders.export', $order)" />
-                    <x-status-update-button :route="route('orders.update', $order)" />
+                    <x-status-update-button :route="route('orders.update', $order)" status="{{ $order->status }}" />
+                    <x-delete-button :route="route('orders.destroy', $order)" />
                 </div>
             </div>
 
@@ -79,129 +80,9 @@
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Sidebar -->
-                <div class="lg:col-span-1">
-                    <!-- Total Amount -->
-                    <div class="bg-white rounded-lg shadow-sm p-6 space-y-6">
-                        <h3
-                            class="text-lg font-semibold text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-3">
-                            <i class="fas fa-dollar-sign text-yellow-500"></i>
-                            {{ __('Order Summary') }}
-                        </h3>
-                        <div>
-                            <x-form-label value="Total Amount" icon="fas fa-money-bill" />
-                            <div class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900">
-                                {{ number_format($order->total_amount) }} {{ __('VND') }}
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Status -->
+                    <!-- Payment Information -->
                     <div class="bg-white rounded-lg shadow-sm p-6 space-y-6 mt-6">
-                        <h3
-                            class="text-lg font-semibold text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-3">
-                            <i class="fas fa-toggle-on text-purple-500"></i>
-                            {{ __('Status') }}
-                        </h3>
-                        <div>
-                            <x-form-label value="Order Status" icon="fas fa-info-circle" />
-                            <div class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900">
-                                @switch($order->status)
-                                    @case('pending')
-                                        <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
-                                            {{ __('Pending') }}
-                                        </span>
-                                    @break
-
-                                    @case('confirmed')
-                                        <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                                            {{ __('Confirmed') }}
-                                        </span>
-                                    @break
-
-                                    @case('processing')
-                                        <span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
-                                            {{ __('Processing') }}
-                                        </span>
-                                    @break
-
-                                    @case('shipping')
-                                        <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
-                                            {{ __('Shipping') }}
-                                        </span>
-                                    @break
-
-                                    @case('delivered')
-                                        <span class="px-2 py-1 text-xs font-medium bg-teal-100 text-teal-800 rounded-full">
-                                            {{ __('Delivered') }}
-                                        </span>
-                                    @break
-
-                                    @case('completed')
-                                        <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                                            {{ __('Completed') }}
-                                        </span>
-                                    @break
-
-                                    @case('cancelled')
-                                        <span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
-                                            {{ __('Cancelled') }}
-                                        </span>
-                                    @break
-
-                                    @case('refunded')
-                                        <span class="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded-full">
-                                            {{ __('Refunded') }}
-                                        </span>
-                                    @break
-
-                                    @case('failed')
-                                        <span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
-                                            {{ __('Failed') }}
-                                        </span>
-                                    @break
-                                @endswitch
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Order Items -->
-                <div class="lg:col-span-3">
-                    <div class="bg-white rounded-lg shadow-sm p-6 space-y-6">
-                        <h3
-                            class="text-lg font-semibold text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-3">
-                            <i class="fas fa-list-ul text-indigo-500"></i>
-                            {{ __('Order Items') }}
-                        </h3>
-                        <x-table title="Items">
-                            <x-thead>
-                                <x-tr>
-                                    <x-th>{{ __('Book') }}</x-th>
-                                    <x-th>{{ __('Quantity') }}</x-th>
-                                    <x-th>{{ __('Unit Price') }}</x-th>
-                                    <x-th>{{ __('Subtotal') }}</x-th>
-                                </x-tr>
-                            </x-thead>
-                            <x-tbody>
-                                @foreach ($order->items as $item)
-                                    <x-tr>
-                                        <x-td>{{ $item->book->title }}</x-td>
-                                        <x-td>{{ $item->quantity }}</x-td>
-                                        <x-td>{{ number_format($item->unit_price) }} {{ __('VND') }}</x-td>
-                                        <x-td>{{ number_format($item->subtotal) }} {{ __('VND') }}</x-td>
-                                    </x-tr>
-                                @endforeach
-                            </x-tbody>
-                        </x-table>
-                    </div>
-                </div>
-
-                <!-- Payment Information -->
-                <div class="lg:col-span-3">
-                    <div class="bg-white rounded-lg shadow-sm p-6 space-y-6">
                         <h3
                             class="text-lg font-semibold text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-3">
                             <i class="fas fa-credit-card text-green-500"></i>
@@ -307,10 +188,162 @@
                         @endif
                     </div>
                 </div>
+
+                <!-- Sidebar -->
+                <div class="lg:col-span-1">
+                    <!-- Total Amount -->
+                    <div class="bg-white rounded-lg shadow-sm p-6 space-y-6">
+                        <h3
+                            class="text-lg font-semibold text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-3">
+                            <i class="fas fa-dollar-sign text-yellow-500"></i>
+                            {{ __('Order Summary') }}
+                        </h3>
+                        <div>
+                            <x-form-label value="Total Amount" icon="fas fa-money-bill" />
+                            <div class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900">
+                                {{ number_format($order->total_amount) }} {{ __('VND') }}
+                            </div>
+                        </div>
+                        <div>
+                            <x-form-label value="Discount Amount" icon="fas fa-tag" />
+                            <div class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900">
+                                {{ number_format($order->discount_amount) }} {{ __('VND') }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="bg-white rounded-lg shadow-sm p-6 space-y-6 mt-6">
+                        <h3
+                            class="text-lg font-semibold text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-3">
+                            <i class="fas fa-toggle-on text-purple-500"></i>
+                            {{ __('Status') }}
+                        </h3>
+                        <div>
+                            <x-form-label value="Order Status" icon="fas fa-info-circle" />
+                            <div class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900">
+                                @switch($order->status)
+                                    @case('pending')
+                                        <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
+                                            {{ __('Pending') }}
+                                        </span>
+                                    @break
+
+                                    @case('confirmed')
+                                        <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                                            {{ __('Confirmed') }}
+                                        </span>
+                                    @break
+
+                                    @case('processing')
+                                        <span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
+                                            {{ __('Processing') }}
+                                        </span>
+                                    @break
+
+                                    @case('shipping')
+                                        <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                                            {{ __('Shipping') }}
+                                        </span>
+                                    @break
+
+                                    @case('delivered')
+                                        <span class="px-2 py-1 text-xs font-medium bg-teal-100 text-teal-800 rounded-full">
+                                            {{ __('Delivered') }}
+                                        </span>
+                                    @break
+
+                                    @case('completed')
+                                        <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                                            {{ __('Completed') }}
+                                        </span>
+                                    @break
+
+                                    @case('cancelled')
+                                        <span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
+                                            {{ __('Cancelled') }}
+                                        </span>
+                                    @break
+
+                                    @case('refunded')
+                                        <span class="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded-full">
+                                            {{ __('Refunded') }}
+                                        </span>
+                                    @break
+
+                                    @case('failed')
+                                        <span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
+                                            {{ __('Failed') }}
+                                        </span>
+                                    @break
+                                @endswitch
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Creator Information -->
+                    <div class="bg-white rounded-lg shadow-sm p-6 space-y-6 mt-6">
+                        <h3
+                            class="text-lg font-semibold text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-3">
+                            <i class="fas fa-user-edit text-pink-500"></i>
+                            {{ __('Creator Information') }}
+                        </h3>
+                        <div>
+                            <x-form-label value="Employee" icon="fas fa-user-tie" />
+                            <div class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900">
+                                @if ($order->employee)
+                                    {{ $order->employee->id }} - {{ $order->employee->name }}
+                                @else
+                                    {{ __('N/A') }}
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Items -->
+                <div class="lg:col-span-3">
+                    <div class="bg-white rounded-lg shadow-sm p-6 space-y-6">
+                        <h3
+                            class="text-lg font-semibold text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-3">
+                            <i class="fas fa-list-ul text-indigo-500"></i>
+                            {{ __('Order Items') }}
+                        </h3>
+                        <x-table title="Items">
+                            <x-thead>
+                                <x-tr>
+                                    <x-th>{{ __('Book') }}</x-th>
+                                    <x-th>{{ __('Quantity') }}</x-th>
+                                    <x-th>{{ __('Unit Price') }}</x-th>
+                                    <x-th>{{ __('Subtotal') }}</x-th>
+                                </x-tr>
+                            </x-thead>
+                            <x-tbody>
+                                @foreach ($order->items as $item)
+                                    <x-tr>
+                                        <x-td>{{ $item->book->title }}</x-td>
+                                        <x-td>{{ $item->quantity }}</x-td>
+                                        <x-td>{{ number_format($item->unit_price) }} {{ __('VND') }}</x-td>
+                                        <x-td>{{ number_format($item->subtotal) }} {{ __('VND') }}</x-td>
+                                    </x-tr>
+                                @endforeach
+                            </x-tbody>
+                        </x-table>
+                    </div>
+                </div>
             </div>
 
             <!-- Status Update Modal -->
-            <x-status-update-modal />
+            <x-status-update-modal :statuses="collect([
+                'pending' => __('Pending'),
+                'confirmed' => __('Confirmed'),
+                'processing' => __('Processing'),
+                'shipping' => __('Shipping'),
+                'delivered' => __('Delivered'),
+                'completed' => __('Completed'),
+            ])" />
+            <!-- Delete Modal -->
+            <x-delete-modal />
         </main>
     </div>
 @endsection

@@ -157,9 +157,9 @@
                             </x-td>
                             <x-td>
                                 <div class="flex flex-col">
-                                    <span class="font-medium">{{ number_format($book->original_price) }}₫</span>
-                                    <span class="line-through">{{ number_format($book->sale_price) }}₫</span>
+                                    <span class="font-medium">{{ number_format($book->sale_price) }}₫</span>
                                     @if ($book->original_price > $book->sale_price)
+                                        <span class="line-through">{{ number_format($book->original_price) }}₫</span>
                                         <span class="text-sm text-red-600">
                                             -{{ round((($book->original_price - $book->sale_price) / $book->original_price) * 100) }}%
                                         </span>

@@ -25,8 +25,8 @@ return new class extends Migration
             $table->string('address')->nullable();
             $table->unique(['provider', 'provider_id']);
             $table->rememberToken();
-            $table->softDeletes();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

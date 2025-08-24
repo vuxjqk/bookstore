@@ -18,6 +18,9 @@
                     </h1>
                     <p class="text-gray-600 mt-1 text-sm">{{ __('Manage all purchase orders in the system.') }}</p>
                 </div>
+                <div>
+                    <x-create-button :route="route('purchase_orders.create')" :title="__('Add New Purchase Order')" />
+                </div>
             </div>
 
             <!-- Statistics Cards -->
@@ -129,7 +132,7 @@
                                     <x-sortable-column :options="['newest', 'oldest']" />
                                 </div>
                             </x-th>
-                            <x-th>{{ __('Total Amount') }}</x-th>
+                            <x-th>{{ __('Price') }}</x-th>
                             <x-th>{{ __('Status') }}</x-th>
                             <x-th>{{ __('Actions') }}</x-th>
                         </x-tr>
@@ -137,13 +140,22 @@
                     <x-tbody>
                         @foreach ($orders as $order)
                             <x-tr>
-                                <x-td>
-                                    <div class="text-lg font-medium">{{ $order->id }}</div>
-                                    <div class="text-sm">{{ $order->purchase_order_code }}</div>
-                                </x-td>
+                                <x-td>{{ $order->id }}</x-td>
                                 <x-td>{{ Str::limit($order->supplier->name ?? __('N/A'), 15, '...') }}</x-td>
                                 <x-td>{{ $order->order_date->format('Y-m-d') }}</x-td>
-                                <x-td>{{ number_format($order->total_amount) }} {{ __('VND') }}</x-td>
+                                <x-td>
+                                    <div class="flex flex-col">
+                                        <span class="font-medium">
+                                            {{ number_format($order->total_amount - $order->discount_amount) }}₫
+                                        </span>
+                                        @if ($order->discount_amount > 0)
+                                            <span class="line-through">{{ number_format($order->total_amount) }}₫</span>
+                                            <span class="text-sm text-red-600">
+                                                -{{ number_format($order->discount_amount) }}₫
+                                            </span>
+                                        @endif
+                                    </div>
+                                </x-td>
                                 <x-td>
                                     @switch($order->status)
                                         @case('pending')
@@ -176,10 +188,10 @@
                                         @if (!$order->trashed())
                                             <x-export-pdf-button :route="route('purchase_orders.export', $order)" />
                                             <x-show-button :route="route('purchase_orders.show', $order)" />
-                                            <x-status-update-button :route="route('purchase_orders.update', $order)" />
+                                            <x-status-update-button :route="route('purchase_orders.update', $order)" status="{{ $order->status }}" />
                                             <x-delete-button :route="route('purchase_orders.destroy', $order)" />
                                         @else
-                                            <x-restore-button :route="route('purchase_orders.destroy', $order)" />
+                                            <x-restore-button :route="route('purchase_orders.restore', $order)" />
                                         @endif
                                     </div>
                                 </x-td>
@@ -195,7 +207,11 @@
             </div>
 
             <!-- Status Update Modal -->
-            <x-status-update-modal />
+            <x-status-update-modal :statuses="collect([
+                'pending' => __('Pending'),
+                'confirmed' => __('Confirmed'),
+                'received' => __('Received'),
+            ])" />
             <!-- Delete/Restore Modal -->
             <x-delete-modal />
         </main>

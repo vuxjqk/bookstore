@@ -51,7 +51,7 @@ class InventoryTransaction extends Model
         );
 
         $query->when(
-            $filters['notes'] ?? null,
+            $filters['search'] ?? null,
             fn($q, $search) =>
             $q->where('notes', 'like', "%{$search}%")
         );

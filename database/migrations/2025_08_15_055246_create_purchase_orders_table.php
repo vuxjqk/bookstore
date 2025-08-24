@@ -14,13 +14,14 @@ return new class extends Migration
         Schema::create('purchase_orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('supplier_id')->constrained();
-            $table->string('purchase_order_code')->unique();
             $table->date('order_date');
             $table->decimal('total_amount', 15, 2)->default(0);
+            $table->decimal('discount_amount', 15, 2)->default(0);
             $table->enum('status', ['pending', 'confirmed', 'received', 'cancelled'])->default('pending');
             $table->text('notes')->nullable();
-            $table->softDeletes();
+            $table->foreignId('employee_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

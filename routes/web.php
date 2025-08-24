@@ -46,7 +46,10 @@ Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remov
 Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 Route::get('/cart/payment', [CartController::class, 'payment'])->name('cart.payment');
 Route::get('/cart/success', [CartController::class, 'success'])->name('cart.success');
-Route::post('/orders/store', [OrderController::class, 'store'])->name('orders.store');
+
+Route::post('/orders/saveOrder', [OrderController::class, 'saveOrder'])->name('orders.saveOrder');
+Route::post('/orders/{id}/restore', [OrderController::class, 'restore'])->name('orders.restore');
+Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
 
 Route::get('/auth/{provider}', [SocialiteController::class, 'redirect']);
 Route::get('/auth/{provider}/callback', [SocialiteController::class, 'callback']);
@@ -76,19 +79,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('books', BookController::class);
         Route::get('/books-export', [BookController::class, 'export'])->name('books.export');
 
-        Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-        Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
-        Route::put('/orders/{order}', [OrderController::class, 'update'])->name('orders.update');
-        Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
+        Route::resource('orders', OrderController::class)->except(['edit', 'destroy']);
         Route::get('/orders/{order}/export', [PDFController::class, 'exportOrderInvoice'])->name('orders.export');
 
-        Route::get('/purchase_orders', [PurchaseOrderController::class, 'index'])->name('purchase_orders.index');
-        Route::get('/purchase_orders/{purchaseOrder}', [PurchaseOrderController::class, 'show'])->name('purchase_orders.show');
-        Route::put('/purchase_orders/{purchaseOrder}', [PurchaseOrderController::class, 'update'])->name('purchase_orders.update');
-        Route::delete('/purchase_orders/{purchaseOrder}', [PurchaseOrderController::class, 'destroy'])->name('purchase_orders.destroy');
+        Route::resource('purchase_orders', PurchaseOrderController::class)->except(['edit']);
+        Route::post('/purchase_orders/{id}/restore', [PurchaseOrderController::class, 'restore'])->name('purchase_orders.restore');
         Route::get('/purchase_orders/{purchaseOrder}/export', [PDFController::class, 'exportPurchaseOrderInvoice'])->name('purchase_orders.export');
 
         Route::get('/inventory_transactions', [InventoryTransactionController::class, 'index'])->name('inventory_transactions.index');
+        Route::put('/inventory_transactions/{inventoryTransaction}', [InventoryTransactionController::class, 'update'])->name('inventory_transactions.update');
 
         Route::resource('users', UserController::class);
 

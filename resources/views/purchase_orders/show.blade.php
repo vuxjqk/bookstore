@@ -25,7 +25,8 @@
                 <div class="flex items-center gap-3">
                     <x-back-button :route="route('purchase_orders.index')" />
                     <x-export-pdf-button :route="route('purchase_orders.export', $order)" />
-                    <x-status-update-button :route="route('purchase_orders.update', $order)" />
+                    <x-status-update-button :route="route('purchase_orders.update', $order)" status="{{ $order->status }}" />
+                    <x-delete-button :route="route('purchase_orders.destroy', $order)" />
                 </div>
             </div>
 
@@ -52,14 +53,6 @@
                             <x-form-label value="Supplier" icon="fas fa-building" />
                             <div class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900">
                                 {{ $order->supplier->name ?? __('N/A') }}
-                            </div>
-                        </div>
-
-                        <!-- Purchase Order Code -->
-                        <div>
-                            <x-form-label value="Order Code" icon="fas fa-barcode" />
-                            <div class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900">
-                                {{ $order->purchase_order_code }}
                             </div>
                         </div>
 
@@ -95,6 +88,12 @@
                             <x-form-label value="Total Amount" icon="fas fa-money-bill" />
                             <div class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900">
                                 {{ number_format($order->total_amount) }} {{ __('VND') }}
+                            </div>
+                        </div>
+                        <div>
+                            <x-form-label value="Discount Amount" icon="fas fa-tag" />
+                            <div class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900">
+                                {{ number_format($order->discount_amount) }} {{ __('VND') }}
                             </div>
                         </div>
                     </div>
@@ -142,6 +141,25 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Creator Information -->
+                    <div class="bg-white rounded-lg shadow-sm p-6 space-y-6 mt-6">
+                        <h3
+                            class="text-lg font-semibold text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-3">
+                            <i class="fas fa-user-edit text-pink-500"></i>
+                            {{ __('Creator Information') }}
+                        </h3>
+                        <div>
+                            <x-form-label value="Employee" icon="fas fa-user-tie" />
+                            <div class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900">
+                                @if ($order->employee)
+                                    {{ $order->employee->id }} - {{ $order->employee->name }}
+                                @else
+                                    {{ __('N/A') }}
+                                @endif
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Order Items -->
@@ -177,7 +195,13 @@
             </div>
 
             <!-- Status Update Modal -->
-            <x-status-update-modal />
+            <x-status-update-modal :statuses="collect([
+                'pending' => __('Pending'),
+                'confirmed' => __('Confirmed'),
+                'received' => __('Received'),
+            ])" />
+            <!-- Delete/Restore Modal -->
+            <x-delete-modal />
         </main>
     </div>
 @endsection

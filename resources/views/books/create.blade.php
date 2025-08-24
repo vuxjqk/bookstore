@@ -42,7 +42,7 @@
 
                             <!-- Title -->
                             <div>
-                                <x-form-label for="title" value="Title" icon="fas fa-book" required />
+                                <x-form-label for="title" value="Title" icon="fas fa-book" />
                                 <x-text-input id="title" name="title" type="text" :value="old('title')" required
                                     autofocus autocomplete="title" placeholder="{{ __('Enter book title') }}" />
                                 <x-input-error :messages="$errors->get('title')" class="mt-2" />
@@ -50,7 +50,7 @@
 
                             <!-- Slug -->
                             <div>
-                                <x-form-label for="slug" value="Slug" icon="fas fa-link" required />
+                                <x-form-label for="slug" value="Slug" icon="fas fa-link" />
                                 <x-text-input id="slug" name="slug" type="text" :value="old('slug')" required
                                     autocomplete="slug" placeholder="{{ __('Enter book slug') }}" />
                                 <x-input-error :messages="$errors->get('slug')" class="mt-2" />

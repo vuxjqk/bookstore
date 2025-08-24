@@ -89,8 +89,8 @@
                             max="{{ date('Y-m-d') }}" />
                     </div>
                     <div>
-                        <x-form-label for="notes" value="Notes" icon="fas fa-sticky-note" />
-                        <x-text-input id="notes" name="notes" type="search" :value="request('notes')"
+                        <x-form-label for="search" value="Notes" icon="fas fa-sticky-note" />
+                        <x-text-input id="search" name="search" type="search" :value="request('search')"
                             placeholder="{{ __('Search by notes...') }}" />
                     </div>
                     <div class="flex items-end">
@@ -152,17 +152,24 @@
                             </x-td>
                             <x-td>{{ $transaction->quantity }}</x-td>
                             <x-td>{{ $transaction->transaction_date->format('Y-m-d') }}</x-td>
-                            <x-td>{{ $transaction->notes ?? __('N/A') }}</x-td>
+                            <x-td>
+                                <button
+                                    data-notes-update-route="{{ route('inventory_transactions.update', $transaction) }}"
+                                    data-notes="{{ old('notes', $transaction->notes) }}"
+                                    title="{{ __('Details') }}"class="flex items-center justify-center text-blue-500 hover:text-blue-600 transition-colors duration-200">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </x-td>
                             <x-td>
                                 @if ($transaction->purchase_order_item_id)
                                     <a href="{{ route('purchase_orders.show', $transaction->purchase_order_item->purchase_order_id) }}"
                                         class="text-blue-600 hover:underline">
-                                        {{ __('Purchase Order #') }}{{ $transaction->purchase_order_item->purchase_order_id }}
+                                        {{ __('PO #') }}{{ $transaction->purchase_order_item->purchase_order_id }}
                                     </a>
                                 @elseif ($transaction->order_item_id)
                                     <a href="{{ route('orders.show', $transaction->order_item->order_id) }}"
                                         class="text-blue-600 hover:underline">
-                                        {{ __('Order #') }}{{ $transaction->order_item->order_id }}
+                                        {{ __('SO #') }}{{ $transaction->order_item->order_id }}
                                     </a>
                                 @else
                                     {{ __('N/A') }}
@@ -177,6 +184,85 @@
             <div class="mt-6 bg-white rounded-lg shadow-sm p-6">
                 {{ $transactions->links() }}
             </div>
+
+            <div id="notes-update-modal"
+                class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 hidden transition-opacity duration-300 ease-out">
+                <div
+                    class="bg-white rounded-xl p-8 w-full max-w-md shadow-2xl transform transition-all duration-300 ease-out scale-95">
+                    <form id="notes-update-form" method="POST" action="">
+                        @csrf
+                        @method('PUT')
+                        <div class="flex items-center gap-2 mb-4">
+                            <i class="fas fa-pencil-alt text-blue-500 text-2xl"></i>
+                            <h2 class="text-2xl font-semibold text-gray-900">{{ __('Notes') }}</h2>
+                        </div>
+
+                        <div class="mb-6">
+                            <x-form-label for="notes" value="Notes" icon="fas fa-sticky-note" />
+                            <x-textarea id="notes" name="notes" autocomplete="notes"
+                                placeholder="{{ __('Enter any additional notes...') }}"></x-textarea>
+                            <x-input-error :messages="$errors->get('notes')" class="mt-2" />
+                        </div>
+
+                        <div class="flex justify-end gap-3">
+                            <button type="button" id="cancel-notes-update-btn"
+                                class="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-times"></i>
+                                {{ __('Cancel') }}
+                            </button>
+                            <button type="submit"
+                                class="flex items-center gap-2 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-save"></i>
+                                {{ __('Update') }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </main>
     </div>
+
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const modal = document.getElementById('notes-update-modal');
+                const form = document.getElementById('notes-update-form');
+                const cancelBtn = document.getElementById('cancel-notes-update-btn');
+                const notesTxt = document.getElementById('notes');
+
+                // Open modal with route-based notes update URL
+                document.querySelectorAll('[data-notes-update-route]').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const notesUpdateUrl = button.getAttribute('data-notes-update-route');
+                        const notes = button.getAttribute('data-notes');
+
+                        form.action = notesUpdateUrl;
+                        notesTxt.value = notes;
+
+                        modal.classList.remove('hidden');
+                        requestAnimationFrame(() => {
+                            modal.querySelector('#notes-update-modal > div').classList.remove(
+                                'scale-95');
+                        });
+                    });
+                });
+
+                // Close modal
+                cancelBtn.addEventListener('click', () => {
+                    modal.classList.add('hidden');
+                    modal.querySelector('#notes-update-modal > div').classList.add(
+                        'scale-95');
+                });
+
+                // Close modal when clicking outside
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.classList.add('hidden');
+                        modal.querySelector('#notes-update-modal > div').classList.add(
+                            'scale-95');
+                    }
+                });
+            });
+        </script>
+    @endpush
 @endsection

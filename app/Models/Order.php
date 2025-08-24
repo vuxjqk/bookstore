@@ -10,13 +10,15 @@ class Order extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'user_id',
+        'customer_id',
         'customer_name',
         'customer_phone',
         'shipping_address',
         'order_date',
         'total_amount',
+        'discount_amount',
         'status',
+        'employee_id',
     ];
 
     protected $casts = [
@@ -37,7 +39,12 @@ class Order extends Model
 
     public function payment()
     {
-        return $this->hasOne(Payment::class)->orderBy('id');;
+        return $this->hasOne(Payment::class)->orderBy('id');
+    }
+
+    public function employee()
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function scopeFilter($query, array $filters)

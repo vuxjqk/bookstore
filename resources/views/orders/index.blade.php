@@ -18,6 +18,9 @@
                     </h1>
                     <p class="text-gray-600 mt-1 text-sm">{{ __('Manage all orders in the system.') }}</p>
                 </div>
+                <div>
+                    <x-create-button :route="route('orders.create')" :title="__('Add New Order')" />
+                </div>
             </div>
 
             <!-- Statistics Cards -->
@@ -134,7 +137,7 @@
                                     <x-sortable-column :options="['newest', 'oldest']" />
                                 </div>
                             </x-th>
-                            <x-th>{{ __('Total Amount') }}</x-th>
+                            <x-th>{{ __('Price') }}</x-th>
                             <x-th>{{ __('Status') }}</x-th>
                             <x-th>{{ __('Actions') }}</x-th>
                         </x-tr>
@@ -149,7 +152,19 @@
                                     <div class="text-sm">{{ $order->shipping_address }}</div>
                                 </x-td>
                                 <x-td>{{ $order->order_date->format('d-m-Y') }}</x-td>
-                                <x-td>{{ number_format($order->total_amount) }} {{ __('VND') }}</x-td>
+                                <x-td>
+                                    <div class="flex flex-col">
+                                        <span class="font-medium">
+                                            {{ number_format($order->total_amount - $order->discount_amount) }}₫
+                                        </span>
+                                        @if ($order->discount_amount > 0)
+                                            <span class="line-through">{{ number_format($order->total_amount) }}₫</span>
+                                            <span class="text-sm text-red-600">
+                                                -{{ number_format($order->discount_amount) }}₫
+                                            </span>
+                                        @endif
+                                    </div>
+                                </x-td>
                                 <x-td>
                                     @switch($order->status)
                                         @case('pending')
@@ -212,10 +227,10 @@
                                         @if (!$order->trashed())
                                             <x-export-pdf-button :route="route('orders.export', $order)" />
                                             <x-show-button :route="route('orders.show', $order)" />
-                                            <x-status-update-button :route="route('orders.update', $order)" />
+                                            <x-status-update-button :route="route('orders.update', $order)" status="{{ $order->status }}" />
                                             <x-delete-button :route="route('orders.destroy', $order)" />
                                         @else
-                                            <x-restore-button :route="route('orders.destroy', $order)" />
+                                            <x-restore-button :route="route('orders.restore', $order)" />
                                         @endif
                                     </div>
                                 </x-td>
@@ -231,7 +246,14 @@
             </div>
 
             <!-- Status Update Modal -->
-            <x-status-update-modal />
+            <x-status-update-modal :statuses="collect([
+                'pending' => __('Pending'),
+                'confirmed' => __('Confirmed'),
+                'processing' => __('Processing'),
+                'shipping' => __('Shipping'),
+                'delivered' => __('Delivered'),
+                'completed' => __('Completed'),
+            ])" />
             <!-- Delete Modal -->
             <x-delete-modal />
         </main>

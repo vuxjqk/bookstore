@@ -11,11 +11,12 @@ class PurchaseOrder extends Model
 
     protected $fillable = [
         'supplier_id',
-        'purchase_order_code',
         'order_date',
         'total_amount',
+        'discount_amount',
         'status',
         'notes',
+        'employee_id',
     ];
 
     protected $casts = [
@@ -37,6 +38,11 @@ class PurchaseOrder extends Model
     public function items()
     {
         return $this->hasMany(PurchaseOrderItem::class);
+    }
+
+    public function employee()
+    {
+        return $this->belongsTo(User::class);
     }
 
     protected function applyRelationFilter($query, $relation, $filterKey, $filters)

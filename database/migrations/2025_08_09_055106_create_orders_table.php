@@ -13,15 +13,17 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('customer_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('customer_name');
             $table->string('customer_phone', 20);
-            $table->string('shipping_address');
+            $table->string('shipping_address')->nullable();
             $table->date('order_date');
             $table->decimal('total_amount', 15, 2)->default(0);
+            $table->decimal('discount_amount', 15, 2)->default(0);
             $table->enum('status', ['pending', 'confirmed', 'processing', 'shipping', 'delivered', 'completed', 'cancelled', 'refunded', 'failed'])->default('pending');
-            $table->softDeletes();
+            $table->foreignId('employee_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
