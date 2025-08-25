@@ -78,6 +78,8 @@
                     <x-back-button :route="route('publishers.index')" />
                 </div>
             </form>
+
+            <x-slug />
         </main>
     </div>
 @endsection

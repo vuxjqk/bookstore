@@ -161,14 +161,14 @@
                                     <label class="cursor-pointer">
                                         <span
                                             class="text-blue-600 hover:text-blue-800 font-medium">{{ __('select files') }}</span>
-                                        <input type="file" name="images[]" id="fileInput" accept="image/*" multiple
+                                        <input type="file" name="images[]" id="file-input" accept="image/*" multiple
                                             class="hidden">
                                     </label>
                                     <p class="text-xs text-gray-400 mt-2">
                                         {{ __('PNG, JPG, JPEG, GIF, SVG up to 4MB each') }}</p>
                                     <x-input-error :messages="$errors->get('images.*')" class="mt-2" />
                                 </div>
-                                <div id="imagePreviewContainer" class="flex flex-wrap gap-4 mt-4 hidden"></div>
+                                <div id="image-preview-container" class="flex flex-wrap gap-4 mt-4 hidden"></div>
                             </div>
                         </div>
                     </div>
@@ -253,6 +253,9 @@
                     <x-back-button :route="route('books.index')" />
                 </div>
             </form>
+
+            <x-slug />
+            <x-image-preview />
         </main>
     </div>
 @endsection

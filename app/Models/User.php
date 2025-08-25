@@ -24,11 +24,12 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at',
         'password',
         'provider',
+        'socialite_verified_at',
         'provider_id',
-        'role',
-        'avatar',
         'phone',
         'address',
+        'avatar',
+        'role',
     ];
 
     /**
@@ -73,7 +74,19 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $query->when(
             $filters['search'] ?? null,
-            fn($q, $search) => $q->where('name', 'like', "%{$search}%")
+            fn($q, $search) =>
+            $q->where(
+                fn($q) =>
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+            )
+        );
+
+        $query->when(
+            $filters['role'] ?? null,
+            fn($q) =>
+            $q->where('role', $filters['role'])
         );
 
         $query->when($filters['sort'] ?? null, function ($q) use ($filters) {

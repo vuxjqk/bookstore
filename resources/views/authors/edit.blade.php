@@ -80,6 +80,8 @@
                     <x-back-button :route="route('authors.index')" />
                 </div>
             </form>
+
+            <x-slug />
         </main>
     </div>
 @endsection

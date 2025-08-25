@@ -18,11 +18,12 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->nullable();
             $table->string('provider', 50)->nullable();
+            $table->timestamp('socialite_verified_at')->nullable();
             $table->string('provider_id')->nullable();
-            $table->enum('role', ['customer', 'admin', 'seller', 'importer'])->default('customer');
-            $table->string('avatar')->nullable();
-            $table->string('phone', 20)->nullable();
+            $table->string('phone', 20)->unique();
             $table->string('address')->nullable();
+            $table->string('avatar')->nullable();
+            $table->enum('role', ['customer', 'admin', 'seller', 'importer'])->default('customer');
             $table->unique(['provider', 'provider_id']);
             $table->rememberToken();
             $table->timestamps();

@@ -14,7 +14,7 @@
             <!-- Search Bar -->
             <div class="relative hidden md:block">
                 <input type="text" placeholder="{{ __('Search') }}..."
-                    class="w-64 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="block w-full px-4 py-2 border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 hover:border-gray-400"
                     aria-label="{{ __('Search') }}">
                 <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
             </div>
@@ -30,14 +30,15 @@
 
             <!-- Main Content Area -->
             <div>
-                <x-select id="language-select" class="block mt-1 w-full" onchange="changeLanguage(this.value)">
+                <select id="language-select"
+                    class="block w-full px-4 py-2 border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 hover:border-gray-400">
                     <option value="vi" {{ app()->getLocale() == 'vi' ? 'selected' : '' }}>
                         {{ __('Vietnamese') }}
                     </option>
                     <option value="en" {{ app()->getLocale() == 'en' ? 'selected' : '' }}>
                         {{ __('English') }}
                     </option>
-                </x-select>
+                </select>
             </div>
 
             <!-- User Menu -->
@@ -83,10 +84,17 @@
 
 @push('scripts')
     <script>
-        function changeLanguage(locale) {
-            let url = "{{ route('change.locale', ['locale' => '__locale__']) }}";
-            url = url.replace('__locale__', locale);
-            window.location.href = url;
-        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const languageSelect = document.getElementById('language-select');
+
+            languageSelect.addEventListener('change', (e) => {
+                const locale = e.target.value;
+
+                const baseUrl = "{{ route('change.locale', ['locale' => '__locale__']) }}";
+                const redirectUrl = baseUrl.replace('__locale__', locale);
+
+                window.location.href = redirectUrl;
+            });
+        });
     </script>
 @endpush

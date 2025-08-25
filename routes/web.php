@@ -90,6 +90,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/inventory_transactions/{inventoryTransaction}', [InventoryTransactionController::class, 'update'])->name('inventory_transactions.update');
 
         Route::resource('users', UserController::class);
+        Route::post('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
 
         Route::resource('settings', BookController::class);
         Route::resource('statistics', BookController::class);

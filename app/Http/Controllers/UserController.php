@@ -14,21 +14,27 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $users = User::filter($request->all())
+        $query = User::query();
+
+        if ($request->has('include_deleted') && $request->boolean('include_deleted')) {
+            $query = $query->withTrashed();
+        }
+
+        $users = $query->filter($request->all())
             ->paginate(10)
             ->appends($request->query());
 
         $totalUsers = User::count();
-        $totalAdmins = User::count();
-        $totalSellers = User::count();
-        $totalCustomers = User::count();
+        $totalCustomers = User::where('role', 'customer')->count();
+        $totalSellers = User::where('role', 'seller')->count();
+        $totalImporters = User::where('role', 'importer')->count();
 
         return view('users.index', compact(
             'users',
             'totalUsers',
-            'totalAdmins',
+            'totalCustomers',
             'totalSellers',
-            'totalCustomers'
+            'totalImporters'
         ));
     }
 
@@ -79,9 +85,49 @@ class UserController extends Controller
     {
         try {
             $user->delete();
+            return redirect()->route('users.index')->with('success', __('User deleted successfully.'));
+        } catch (QueryException $e) {
+            $msg = $e->getCode() === '23000'
+                ? __('Cannot delete because it is in use.')
+                : __('An error occurred while deleting: ') . $e->getMessage();
+
+            return redirect()->back()->with('error', $msg);
+        }
+    }
+
+    public function restore($id)
+    {
+        $user = User::withTrashed()->find($id);
+
+        if (!$user) {
+            return redirect()->back()->with('error', __('User not found.'));
+        }
+
+        if ($user->trashed()) {
+            $user->deleted_at = null;
+            $user->save();
+            return redirect()->route('users.index')->with('success', __('User restored successfully.'));
+        } else {
+            return redirect()->back()->with('error', __('This user has not been deleted.'));
+        }
+    }
+
+    public function forceDelete($id)
+    {
+        $user = User::withTrashed()->find($id);
+
+        if (!$user) {
+            return redirect()->back()->with('error', __('User not found.'));
+        }
+
+        try {
             if ($user->avatar) {
                 Storage::disk('public')->delete($user->avatar);
             }
+
+            $user->forceDelete();
+
+            return redirect()->route('users.index')->with('success', __('User permanently deleted.'));
         } catch (QueryException $e) {
             $msg = $e->getCode() === '23000'
                 ? __('Cannot delete because it is in use.')

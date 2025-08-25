@@ -72,6 +72,8 @@
                     <x-back-button :route="route('categories.index')" />
                 </div>
             </form>
+
+            <x-slug />
         </main>
     </div>
 @endsection
