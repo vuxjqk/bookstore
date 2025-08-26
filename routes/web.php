@@ -15,6 +15,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublisherController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\StatisticController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
 use App\Models\Book;
@@ -89,11 +90,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/inventory_transactions', [InventoryTransactionController::class, 'index'])->name('inventory_transactions.index');
         Route::put('/inventory_transactions/{inventoryTransaction}', [InventoryTransactionController::class, 'update'])->name('inventory_transactions.update');
 
-        Route::resource('users', UserController::class);
+        Route::resource('users', UserController::class)->except(['create', 'store', 'edit']);
         Route::post('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
+        Route::delete('/users/{id}/forceDelete', [UserController::class, 'forceDelete'])->name('users.forceDelete');
 
+        Route::get('/statistics', [StatisticController::class, 'index'])->name('statistics.index');
         Route::resource('settings', BookController::class);
-        Route::resource('statistics', BookController::class);
         Route::resource('reports', BookController::class);
         Route::resource('system', BookController::class);
         Route::resource('permissions', BookController::class);

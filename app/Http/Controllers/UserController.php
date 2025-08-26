@@ -75,7 +75,12 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        //
+        $validated = $request->validate([
+            'role' => 'required|in:customer,admin,seller,importer',
+        ]);
+
+        $user->update($validated);
+        return redirect()->back()->with('success', __('Role updated successfully.'));
     }
 
     /**

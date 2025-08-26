@@ -127,7 +127,7 @@
                                 <x-td>{{ $user->id }}</x-td>
                                 <x-td>{{ $user->name }}</x-td>
                                 <x-td>{{ $user->email ?? __('N/A') }}</x-td>
-                                <x-td>{{ $user->phone ?? __('N/A') }}</x-td>
+                                <x-td>{{ $user->phone }}</x-td>
                                 <x-td>
                                     @switch($user->role)
                                         @case('customer')
@@ -159,9 +159,14 @@
                                     <div class="flex items-center gap-2">
                                         @if ($user->trashed())
                                             <x-restore-button :route="route('users.restore', $user)" />
+                                            <x-delete-button :route="route('users.forceDelete', $user)" />
                                         @else
                                             <x-show-button :route="route('users.show', $user)" />
-                                            <x-edit-button :route="route('users.edit', $user)" />
+                                            <button data-role-update-route="{{ route('users.update', $user) }}"
+                                                data-role="{{ old('role', $user->role) }}" title="{{ __('Edit') }}"
+                                                class="flex items-center justify-center bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-lg transition-colors duration-200">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
                                             <x-delete-button :route="route('users.destroy', $user)" />
                                         @endif
                                     </div>
@@ -179,6 +184,90 @@
 
             <!-- Delete/Restore Modal -->
             <x-delete-modal />
+
+            <div id="role-update-modal"
+                class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 hidden transition-opacity duration-300 ease-out">
+                <div
+                    class="bg-white rounded-xl p-8 w-full max-w-md shadow-2xl transform transition-all duration-300 ease-out scale-95">
+                    <form id="role-update-form" method="POST" action="">
+                        @csrf
+                        @method('PUT')
+                        <div class="flex items-center gap-2 mb-4">
+                            <i class="fas fa-user text-blue-500 text-2xl"></i>
+                            <h2 class="text-2xl font-semibold text-gray-900">{{ __('Role') }}</h2>
+                        </div>
+
+                        <div class="mb-6">
+                            <x-form-label for="role" value="Role" icon="fas fa-user" />
+                            <x-select id="role" name="role" :options="[
+                                'customer' => __('Customer'),
+                                'admin' => __('Admin'),
+                                'seller' => __('Seller'),
+                                'importer' => __('Importer'),
+                            ]"
+                                placeholder="{{ __('Select role') }}" required :selected="old('role', $user->role)" />
+                            <x-input-error :messages="$errors->get('role')" class="mt-2" />
+                        </div>
+
+                        <div class="flex justify-end gap-3">
+                            <button type="button" id="cancel-role-update-btn"
+                                class="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-times"></i>
+                                {{ __('Cancel') }}
+                            </button>
+                            <button type="submit"
+                                class="flex items-center gap-2 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-save"></i>
+                                {{ __('Update') }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </main>
     </div>
+
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const modal = document.getElementById('role-update-modal');
+                const form = document.getElementById('role-update-form');
+                const cancelBtn = document.getElementById('cancel-role-update-btn');
+                const roleSlt = document.getElementById('role');
+
+                // Open modal with route-based role update URL
+                document.querySelectorAll('[data-role-update-route]').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const roleUpdateUrl = button.getAttribute('data-role-update-route');
+                        const role = button.getAttribute('data-role');
+
+                        form.action = roleUpdateUrl;
+                        roleSlt.value = role;
+
+                        modal.classList.remove('hidden');
+                        requestAnimationFrame(() => {
+                            modal.querySelector('#role-update-modal > div').classList.remove(
+                                'scale-95');
+                        });
+                    });
+                });
+
+                // Close modal
+                cancelBtn.addEventListener('click', () => {
+                    modal.classList.add('hidden');
+                    modal.querySelector('#role-update-modal > div').classList.add(
+                        'scale-95');
+                });
+
+                // Close modal when clicking outside
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.classList.add('hidden');
+                        modal.querySelector('#role-update-modal > div').classList.add(
+                            'scale-95');
+                    }
+                });
+            });
+        </script>
+    @endpush
 @endsection

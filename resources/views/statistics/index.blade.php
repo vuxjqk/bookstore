@@ -1,11 +1,11 @@
 @extends('layouts.admin')
 
-@section('title', __('Dashboard'))
+@section('title', __('Statistics'))
 
 @section('content')
     <div class="py-8 px-4 sm:px-6 lg:px-8">
         <!-- Breadcrumb -->
-        <x-breadcrumb :items="[['label' => 'Home', 'url' => url('/')], ['label' => 'Dashboard']]" />
+        <x-breadcrumb :items="[['label' => 'Home', 'url' => url('/')], ['label' => 'Statistics']]" />
 
         <!-- Main Content Area -->
         <main class="mt-6 bg-gray-50 rounded-xl shadow-sm p-6 sm:p-8">
@@ -14,10 +14,30 @@
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
                         <i class="fas fa-chart-line text-blue-500"></i>
-                        {{ __('Dashboard') }}
+                        {{ __('Statistics') }}
                     </h1>
-                    <p class="text-gray-600 mt-1 text-sm">{{ __('Overview of revenue statistics.') }}</p>
+                    <p class="text-gray-600 mt-1 text-sm">{{ __('Detailed statistics with time-based filtering.') }}</p>
                 </div>
+                <!-- Filter Form -->
+                <form action="{{ route('statistics.index') }}" method="GET" class="flex gap-2">
+                    <select name="filter" id="filter"
+                        class="border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
+                        onchange="this.form.submit()">
+                        <option value="today" {{ $filter === 'today' ? 'selected' : '' }}>Today</option>
+                        <option value="week" {{ $filter === 'week' ? 'selected' : '' }}>This Week</option>
+                        <option value="month" {{ $filter === 'month' ? 'selected' : '' }}>This Month</option>
+                        <option value="custom" {{ $filter === 'custom' ? 'selected' : '' }}>Custom Range</option>
+                    </select>
+                    @if ($filter === 'custom')
+                        <input type="date" name="start_date" value="{{ $startDate->format('Y-m-d') }}"
+                            class="border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500" required>
+                        <input type="date" name="end_date"
+                            value="{{ $endDate ? $endDate->format('Y-m-d') : now()->format('Y-m-d') }}"
+                            class="border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500" required>
+                        <button type="submit"
+                            class="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600">Apply</button>
+                    @endif
+                </form>
             </div>
 
             <!-- Stats Cards -->
@@ -26,7 +46,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600">{{ __('Total Books') }}</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ $totalBooks }}</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ number_format($totalBooks) }}</p>
                         </div>
                         <div class="bg-blue-500 p-3 rounded-full">
                             <i class="fas fa-book text-white"></i>
@@ -38,7 +58,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600">{{ __('Purchase Cost') }}</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ number_format($totalPurchaseCostToday) }}</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ number_format($totalPurchaseCostToday) }}₫</p>
                         </div>
                         <div class="bg-yellow-500 p-3 rounded-full">
                             <i class="fas fa-truck-loading text-white"></i>
@@ -50,7 +70,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600">{{ __('Orders') }}</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ $totalOrdersToday }}</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ number_format($totalOrdersToday) }}</p>
                         </div>
                         <div class="bg-green-500 p-3 rounded-full">
                             <i class="fas fa-shopping-cart text-white"></i>
@@ -62,7 +82,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600">{{ __('Revenue') }}</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ number_format($totalRevenueToday) }}</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ number_format($totalRevenueToday) }}₫</p>
                         </div>
                         <div class="bg-red-500 p-3 rounded-full">
                             <i class="fas fa-dollar-sign text-white"></i>
@@ -183,76 +203,134 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', () => {
-                // Monthly Revenue Chart
-                const monthlyRevenueCtx = document.getElementById('monthlyRevenueChart').getContext('2d');
-                const monthlyRevenue = @json($monthlyRevenue);
-                const months = Object.keys(monthlyRevenue);
-                const revenues = Object.values(monthlyRevenue);
+                // Initial chart rendering
+                function renderCharts() {
+                    // Monthly Revenue Chart
+                    const monthlyRevenueCtx = document.getElementById('monthlyRevenueChart').getContext('2d');
+                    const monthlyRevenue = @json($monthlyRevenue);
+                    const months = Object.keys(monthlyRevenue);
+                    const revenues = Object.values(monthlyRevenue);
 
-                new Chart(monthlyRevenueCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: months,
-                        datasets: [{
-                            label: 'Revenue ($)',
-                            data: revenues,
-                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
-                            borderColor: 'rgba(59, 130, 246, 1)',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: 'Revenue ($)'
+                    new Chart(monthlyRevenueCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: months,
+                            datasets: [{
+                                label: 'Revenue (₫)',
+                                data: revenues,
+                                backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                                borderColor: 'rgba(59, 130, 246, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Revenue (₫)'
+                                    },
+                                    ticks: {
+                                        callback: value => `${value.toLocaleString()}₫`
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    position: 'top'
+                                },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false
                                 }
                             }
+                        }
+                    });
+
+                    // Top Books Chart
+                    const topBooksCtx = document.getElementById('topBooksChart').getContext('2d');
+                    const topBooks = @json($topBooksLimited);
+                    const bookLabels = topBooks.map(book => book.title);
+                    const bookSales = topBooks.map(book => book.total_sold);
+
+                    new Chart(topBooksCtx, {
+                        type: 'pie',
+                        data: {
+                            labels: bookLabels,
+                            datasets: [{
+                                data: bookSales,
+                                backgroundColor: ['#3b82f6', '#9333ea', '#f59e0b', '#10b981'],
+                                borderWidth: 1
+                            }]
                         },
-                        plugins: {
-                            legend: {
-                                position: 'top'
-                            },
-                            tooltip: {
-                                mode: 'index',
-                                intersect: false
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'right'
+                                },
+                                tooltip: {
+                                    mode: 'point'
+                                }
                             }
                         }
+                    });
+                }
+
+                // Initial render
+                renderCharts();
+
+                // Handle filter change with AJAX (simulated)
+                document.getElementById('filter').addEventListener('change', function() {
+                    const form = this.form;
+                    if (this.value === 'custom') {
+                        form.querySelectorAll('input[type="date"]').forEach(input => input.classList.remove(
+                            'hidden'));
+                        form.querySelector('button[type="submit"]').classList.remove('hidden');
+                    } else {
+                        form.querySelectorAll('input[type="date"]').forEach(input => input.classList.add(
+                            'hidden'));
+                        form.querySelector('button[type="submit"]').classList.add('hidden');
+                        form.submit();
                     }
                 });
 
-                // Top Books Chart
-                const topBooksCtx = document.getElementById('topBooksChart').getContext('2d');
-                const topBooks = @json($topBooksLimited);
-                const bookLabels = topBooks.map(book => book.title);
-                const bookSales = topBooks.map(book => book.total_sold);
-
-                new Chart(topBooksCtx, {
-                    type: 'pie',
-                    data: {
-                        labels: bookLabels,
-                        datasets: [{
-                            data: bookSales,
-                            backgroundColor: ['#3b82f6', '#9333ea', '#f59e0b', '#10b981'],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'right'
+                // Simulated AJAX update (replace with actual API call)
+                function updateStatistics(filter) {
+                    // This would typically fetch from /api/statistics?filter={filter}
+                    fetch(`/api/statistics?filter=${filter}`, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json'
                             },
-                            tooltip: {
-                                mode: 'point'
-                            }
-                        }
-                    }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            document.querySelectorAll('.stats-card p:nth-child(2)').forEach((el, idx) => {
+                                el.textContent = number_format(data.stats[idx].value) + (idx < 2 ? '₫' :
+                                '');
+                            });
+                            // Update charts (simplified)
+                            renderCharts(); // Re-render with new data
+                        })
+                        .catch(error => console.error('Error:', error));
+                }
+
+                // Trigger update on form submit
+                document.querySelector('form').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(this);
+                    const filter = formData.get('filter');
+                    updateStatistics(filter);
                 });
             });
+
+            // Helper function for number formatting
+            function number_format(number) {
+                return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            }
         </script>
     @endpush
 @endsection
