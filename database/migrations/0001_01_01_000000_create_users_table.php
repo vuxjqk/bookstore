@@ -18,16 +18,17 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->nullable();
             $table->string('provider', 50)->nullable();
-            $table->timestamp('socialite_verified_at')->nullable();
             $table->string('provider_id')->nullable();
-            $table->string('phone', 20)->unique();
+            $table->date('date_of_birth')->nullable();
+            $table->enum('gender', ['male', 'female'])->nullable();
+            $table->string('phone', 20)->nullable();
             $table->string('address')->nullable();
             $table->string('avatar')->nullable();
-            $table->enum('role', ['customer', 'admin', 'seller', 'importer'])->default('customer');
-            $table->unique(['provider', 'provider_id']);
+            $table->enum('role', ['admin', 'seller', 'importer', 'customer'])->default('customer');
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();
+            $table->unique(['provider', 'provider_id']);
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

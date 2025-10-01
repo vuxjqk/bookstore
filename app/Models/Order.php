@@ -19,6 +19,7 @@ class Order extends Model
         'discount_amount',
         'status',
         'employee_id',
+        'promotion_id',
     ];
 
     protected $casts = [

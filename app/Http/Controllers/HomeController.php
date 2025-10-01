@@ -34,7 +34,7 @@ class HomeController extends Controller
     public function autocomplete(Request $request)
     {
         $term = $request->query('term');
-        $books = Book::where('title', 'like', '%' . $term . '%')
+        $books = Book::where('title', 'like', $term . '%')
             ->select('slug', 'title')
             ->take(5)
             ->get()

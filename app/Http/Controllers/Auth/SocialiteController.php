@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -26,30 +25,39 @@ class SocialiteController extends Controller
             ->first();
 
         if (!$user) {
-            $path = null;
-            if ($socialUser->getAvatar()) {
-                $response = Http::get($socialUser->getAvatar());
+            $user = User::where('email', $socialUser->getEmail())
+                ->first();
 
-                if ($response->successful()) {
-                    $extension = pathinfo($socialUser->getAvatar(), PATHINFO_EXTENSION);
-                    $filename = 'avatar_' . $socialUser->getId() . '_' . time() . '.' . ($extension ?: 'jpg');
+            if (!$user) {
+                $path = null;
+                if ($socialUser->getAvatar()) {
+                    $response = Http::get($socialUser->getAvatar());
 
-                    Storage::disk('public')->put('avatars/' . $filename, $response->body());
-                    $path = 'avatars/' . $filename;
+                    if ($response->successful()) {
+                        $extension = pathinfo($socialUser->getAvatar(), PATHINFO_EXTENSION);
+                        $filename = 'avatar_' . $socialUser->getId() . '_' . time() . '.' . ($extension ?: 'jpg');
+                        Storage::disk('public')->put('avatars/' . $filename, $response->body());
+                        $path = 'avatars/' . $filename;
+                    }
                 }
 
                 $user = User::create([
-                    'name' => $socialUser->getName() ?? $socialUser->getNickname(),
+                    'name' => $socialUser->getName() ?: $socialUser->getNickname(),
+                    'email' => $socialUser->getEmail(),
                     'email_verified_at' => now(),
                     'provider' => $provider,
                     'provider_id' => $socialUser->getId(),
                     'avatar' => $path,
                 ]);
+            } else {
+                $user->update([
+                    'provider' => $provider,
+                    'provider_id' => $socialUser->getId(),
+                ]);
             }
         }
 
         Auth::login($user);
-
         return redirect()->intended(route('dashboard', absolute: false));
     }
 }

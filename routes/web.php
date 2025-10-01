@@ -12,6 +12,7 @@ use App\Http\Controllers\InventoryTransactionController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PDFController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\PublisherController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\ReviewController;
@@ -52,6 +53,8 @@ Route::post('/orders/saveOrder', [OrderController::class, 'saveOrder'])->name('o
 Route::post('/orders/{id}/restore', [OrderController::class, 'restore'])->name('orders.restore');
 Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
 
+Route::get('/vnpay/callback', [OrderController::class, 'vnpayCallback'])->name('vnpay.callback');
+
 Route::get('/auth/{provider}', [SocialiteController::class, 'redirect']);
 Route::get('/auth/{provider}/callback', [SocialiteController::class, 'callback']);
 
@@ -76,6 +79,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('authors', AuthorController::class);
         Route::resource('publishers', PublisherController::class);
         Route::resource('suppliers', SupplierController::class);
+        Route::resource('promotions', PromotionController::class);
 
         Route::resource('books', BookController::class);
         Route::get('/books-export', [BookController::class, 'export'])->name('books.export');

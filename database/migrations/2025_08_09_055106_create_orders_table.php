@@ -22,6 +22,7 @@ return new class extends Migration
             $table->decimal('discount_amount', 15, 2)->default(0);
             $table->enum('status', ['pending', 'confirmed', 'processing', 'shipping', 'delivered', 'completed', 'cancelled', 'refunded', 'failed'])->default('pending');
             $table->foreignId('employee_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('promotion_id')->nullable()->constrained()->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
         });

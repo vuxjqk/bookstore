@@ -213,6 +213,18 @@
                         <span class="ml-1 hidden sm:inline">{{ __('Cart') }}</span>
                     </a>
 
+                    <div>
+                        <select id="language-select"
+                            class="block w-full px-4 py-2 border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 hover:border-gray-400">
+                            <option value="vi" {{ app()->getLocale() == 'vi' ? 'selected' : '' }}>
+                                {{ __('Vietnamese') }}
+                            </option>
+                            <option value="en" {{ app()->getLocale() == 'en' ? 'selected' : '' }}>
+                                {{ __('English') }}
+                            </option>
+                        </select>
+                    </div>
+
                     <!-- User Menu -->
                     <div class="relative">
                         @auth
@@ -368,13 +380,6 @@
         </div>
     </footer>
 
-    <!-- Toast Notification -->
-    <div id="toast"
-        class="fixed top-4 right-4 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform flex items-center gap-2">
-        <i id="toastIcon" class="fas"></i>
-        <span id="toastMessage"></span>
-    </div>
-
     <!-- Confirmation Modal -->
     <div id="modal" class="fixed inset-0 bg-gray-600/50 hidden flex items-center justify-center z-50">
         <div class="bg-white rounded-lg p-6 w-full max-w-md">
@@ -391,8 +396,12 @@
         </div>
     </div>
 
+    <!-- Toast Notification -->
+    <x-toast />
+
     <!-- Scripts -->
     @vite(['resources/js/app.js'])
+    @stack('scripts')
     <script>
         window.addEventListener('load', () => {
             const overlay = document.getElementById('loadingOverlay');
@@ -400,6 +409,17 @@
         });
 
         document.addEventListener('DOMContentLoaded', () => {
+            const languageSelect = document.getElementById('language-select');
+
+            languageSelect.addEventListener('change', (e) => {
+                const locale = e.target.value;
+
+                const baseUrl = "{{ route('change.locale', ['locale' => '__locale__']) }}";
+                const redirectUrl = baseUrl.replace('__locale__', locale);
+
+                window.location.href = redirectUrl;
+            });
+
             // Prevent default for placeholder links
             document.querySelectorAll('a[href="#"]').forEach(link => {
                 link.addEventListener('click', e => e.preventDefault());
@@ -473,28 +493,6 @@
                 }, 200);
             });
 
-            // Toast notification
-            window.showToast = (message, type = 'success') => {
-                const toast = document.getElementById('toast');
-                const messageElement = document.getElementById('toastMessage');
-                const iconElement = document.getElementById('toastIcon');
-
-                toast.className =
-                    'fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform flex items-center gap-2';
-                toast.classList.add(type === 'success' ? 'toast-success' : 'toast-error');
-                iconElement.className =
-                    `fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}`;
-                messageElement.textContent = message;
-
-                toast.classList.remove('translate-x-full');
-                toast.classList.add('translate-x-0');
-
-                setTimeout(() => {
-                    toast.classList.add('translate-x-full');
-                    toast.classList.remove('translate-x-0');
-                }, 5000);
-            };
-
             // Handle session storage messages
             window.onload = () => {
                 const success = sessionStorage.getItem('success');
@@ -509,14 +507,6 @@
                     sessionStorage.removeItem('error');
                 }
             };
-
-            @if (session('success'))
-                showToast("{{ session('success') }}", "success");
-            @endif
-
-            @if (session('error'))
-                showToast("{{ session('error') }}", "error");
-            @endif
 
             @if (session('status'))
                 showToast("{{ session('status') }}", "success");
@@ -666,7 +656,6 @@
             });
         });
     </script>
-    @stack('scripts')
 </body>
 
 </html>

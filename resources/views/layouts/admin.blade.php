@@ -69,15 +69,6 @@
         window.addEventListener('load', () => {
             // Hide loading overlay
             document.getElementById('loadingOverlay').classList.add('hidden');
-
-            // Toast notifications
-            @if (session('success'))
-                showToast("{{ session('success') }}", "success");
-            @endif
-
-            @if (session('error'))
-                showToast("{{ session('error') }}", "error");
-            @endif
         });
 
         document.addEventListener('DOMContentLoaded', () => {

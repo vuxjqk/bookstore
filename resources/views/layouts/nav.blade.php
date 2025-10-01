@@ -89,6 +89,12 @@
             'label' => __('Users'),
             'routeMatch' => 'users.*',
         ],
+        [
+            'route' => 'promotions.index',
+            'icon' => 'fa-tags',
+            'label' => __('Promotion'),
+            'routeMatch' => 'promotions.*',
+        ],
     ] as $item)
             <a href="{{ route($item['route']) }}"
                 class="{{ request()->routeIs($item['routeMatch']) ? $active : $inactive }}"

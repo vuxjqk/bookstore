@@ -24,8 +24,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at',
         'password',
         'provider',
-        'socialite_verified_at',
         'provider_id',
+        'date_of_birth',
+        'gender',
         'phone',
         'address',
         'avatar',
@@ -52,6 +53,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'date_of_birth' => 'date',
         ];
     }
 
@@ -72,32 +74,28 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function scopeFilter($query, array $filters)
     {
-        $query->when(
-            $filters['search'] ?? null,
-            fn($q, $search) =>
-            $q->where(
-                fn($q) =>
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%")
+        return $query
+            ->when(
+                $filters['search'] ?? null,
+                fn($q, $search) =>
+                $q->where(
+                    fn($q) =>
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%")
+                )
             )
-        );
-
-        $query->when(
-            $filters['role'] ?? null,
-            fn($q) =>
-            $q->where('role', $filters['role'])
-        );
-
-        $query->when($filters['sort'] ?? null, function ($q) use ($filters) {
-            if (array_key_exists($filters['sort'], self::SORT_OPTIONS)) {
-                [$column, $direction] = self::SORT_OPTIONS[$filters['sort']];
-                $q->orderBy($column, $direction);
-            } else {
-                $q->orderBy('created_at', 'desc');
-            }
-        }, fn($q) => $q->orderBy('created_at', 'desc'));
-
-        return $query;
+            ->when(
+                $filters['role'] ?? null,
+                fn($q, $role) =>
+                $q->where('role', $role)
+            )
+            ->when(
+                $filters['sort'] ?? null,
+                fn($q, $sort) =>
+                array_key_exists($sort, self::SORT_OPTIONS)
+                    ? $q->orderBy(...self::SORT_OPTIONS[$sort])
+                    : $q->orderBy('created_at', 'desc')
+            );
     }
 }

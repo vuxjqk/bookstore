@@ -25,25 +25,22 @@ class Publisher extends Model
 
     public function scopeFilter($query, array $filters)
     {
-        $query->when(
-            $filters['search'] ?? null,
-            fn($q, $search) =>
-            $q->where(
-                fn($q) =>
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('slug', 'like', "%{$search}%")
+        return $query
+            ->when(
+                $filters['search'] ?? null,
+                fn($q, $search) =>
+                $q->where(
+                    fn($q) =>
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('slug', 'like', "%{$search}%")
+                )
             )
-        );
-
-        $query->when($filters['sort'] ?? null, function ($q) use ($filters) {
-            if (array_key_exists($filters['sort'], self::SORT_OPTIONS)) {
-                [$column, $direction] = self::SORT_OPTIONS[$filters['sort']];
-                $q->orderBy($column, $direction);
-            } else {
-                $q->orderBy('created_at', 'desc');
-            }
-        }, fn($q) => $q->orderBy('created_at', 'desc'));
-
-        return $query;
+            ->when(
+                $filters['sort'] ?? null,
+                fn($q, $sort) =>
+                array_key_exists($sort, self::SORT_OPTIONS)
+                    ? $q->orderBy(...self::SORT_OPTIONS[$sort])
+                    : $q->orderBy('created_at', 'desc')
+            );
     }
 }

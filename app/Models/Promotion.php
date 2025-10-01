@@ -16,4 +16,12 @@ class Promotion extends Model
         'start_date',
         'end_date',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'start_date' => 'datetime',
+            'end_date' => 'datetime',
+        ];
+    }
 }

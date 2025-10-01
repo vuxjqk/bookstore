@@ -1,17 +1,25 @@
-<!-- Toast Notification Container -->
 <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
 @pushOnce('scripts')
     <script>
+        window.addEventListener('load', () => {
+            @if (session('success'))
+                showToast("{{ session('success') }}", "success");
+            @endif
+
+            @if (session('error'))
+                showToast("{{ session('error') }}", "error");
+            @endif
+        });
+
         document.addEventListener('DOMContentLoaded', () => {
             const toastContainer = document.getElementById('toast-container');
 
-            window.showToast = (message, type = 'success', duration = 5000) => {
+            window.showToast = (message, type = 'info', duration = 3000) => {
                 const toast = document.createElement('div');
                 toast.className =
-                    'flex items-center gap-2 px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-all duration-300 ease-out opacity-0';
+                    'text-white w-64 flex items-center px-6 py-3 gap-2 shadow-sm rounded-lg -translate-x-full transform transition-transform opacity-0 transition-opacity duration-300 ease-out';
 
-                // Define styles based on type
                 const toastStyles = {
                     success: {
                         bg: 'bg-green-500',
@@ -28,33 +36,27 @@
                     warning: {
                         bg: 'bg-yellow-500',
                         icon: 'fas fa-exclamation-triangle'
-                    },
-                    default: {
-                        bg: 'bg-gray-700',
-                        icon: 'fas fa-bell'
                     }
                 };
 
                 const {
                     bg,
                     icon
-                } = toastStyles[type] || toastStyles.default;
-                toast.classList.add(bg, 'text-white', 'max-w-xs', 'shadow-lg', 'animate-bounce-in');
+                } = toastStyles[type] || toastStyles.info;
 
-                // Toast content
+                toast.classList.add(bg);
+
                 toast.innerHTML = `
                     <i class="${icon}"></i>
                     <span class="flex-1">${message}</span>
-                    <button type="button" class="close-toast ml-2 text-white hover:text-gray-200 focus:outline-none">
+                    <button type="button" class="close-toast ms-2 text-gray-200 hover:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                         <i class="fas fa-times"></i>
                     </button>
-                    <div class="progress-bar w-full h-1 bg-opacity-50 bg-white absolute bottom-0 left-0" style="transition: width ${duration}ms linear"></div>
+                    <div class="progress-bar w-full h-1 bg-white/50 absolute bottom-0 left-0" style="transition: width ${duration}ms linear"></div>
                 `;
 
-                // Append to container (stacking)
                 toastContainer.appendChild(toast);
 
-                // Animation and progress
                 requestAnimationFrame(() => {
                     toast.classList.remove('translate-x-full', 'opacity-0');
                     toast.classList.add('translate-x-0', 'opacity-100');
@@ -89,20 +91,16 @@
                     progressBar.style.width = currentWidth;
                 }
 
-                // Auto-close with fade-out
                 startTimer();
 
-                // Pause on hover
                 toast.addEventListener('mouseenter', () => {
                     pauseTimer();
                 });
 
-                // Resume on mouse leave
                 toast.addEventListener('mouseleave', () => {
                     startTimer();
                 });
 
-                // Close button
                 toast.querySelector('.close-toast').addEventListener('click', () => {
                     clearTimeout(timeout);
                     toast.classList.remove('translate-x-0', 'opacity-100');

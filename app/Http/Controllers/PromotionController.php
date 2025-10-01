@@ -10,9 +10,23 @@ class PromotionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $promotions = Promotion::query()
+            ->when(
+                $request->search,
+                fn($q, $search) =>
+                $q->where('code', 'like', "%{$search}%")
+            )
+            ->when(
+                $request->sort,
+                fn($q, $sort) =>
+                $q->orderBy('code', $sort === 'a_to_z' ? 'asc' : 'desc')
+            )
+            ->paginate(12)
+            ->appends($request->query());
+
+        return view('promotions.index', compact('promotions'));
     }
 
     /**
@@ -20,7 +34,7 @@ class PromotionController extends Controller
      */
     public function create()
     {
-        //
+        return view('promotions.create');
     }
 
     /**
@@ -28,7 +42,20 @@ class PromotionController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'code' => 'required|string|max:50|unique:promotions',
+            'discount_percentage' => 'required|numeric|min:0|max:100',
+            'max_discount_amount' => 'nullable|numeric|min:0',
+            'min_order_amount' => 'nullable|numeric|min:0',
+            'max_usage_count' => 'nullable|integer|min:1',
+            'is_active' => 'boolean',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+        ]);
+
+        Promotion::create($validated);
+
+        return redirect()->route('promotions.index')->with('success', __('Promotion created successfully.'));
     }
 
     /**
@@ -44,7 +71,7 @@ class PromotionController extends Controller
      */
     public function edit(Promotion $promotion)
     {
-        //
+        return view('promotions.edit', compact('promotion'));
     }
 
     /**
@@ -52,7 +79,20 @@ class PromotionController extends Controller
      */
     public function update(Request $request, Promotion $promotion)
     {
-        //
+        $validated = $request->validate([
+            'code' => 'required|string|max:50|unique:promotions,code,' . $promotion->id,
+            'discount_percentage' => 'required|numeric|min:0|max:100',
+            'max_discount_amount' => 'nullable|numeric|min:0',
+            'min_order_amount' => 'nullable|numeric|min:0',
+            'max_usage_count' => 'nullable|integer|min:1',
+            'is_active' => 'boolean',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+        ]);
+
+        $promotion->update($validated);
+
+        return redirect()->route('promotions.index')->with('success', __('Promotion updated successfully.'));
     }
 
     /**
