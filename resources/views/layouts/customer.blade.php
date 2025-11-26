@@ -281,15 +281,34 @@
         <nav id="nav-menu" class="bg-blue-600 text-white hidden md:block">
             <div class="container mx-auto px-4">
                 <div class="flex flex-col md:flex-row md:space-x-8 py-3">
-                    <a href="{{ url('/') }}"
-                        class="hover:text-blue-200 transition-colors py-2">{{ __('Home') }}</a>
-                    <a href="#" class="hover:text-blue-200 transition-colors py-2">{{ __('Novels') }}</a>
-                    <a href="#"
-                        class="hover:text-blue-200 transition-colors py-2">{{ __('Children Books') }}</a>
-                    <a href="#" class="hover:text-blue-200 transition-colors py-2">{{ __('Textbooks') }}</a>
-                    <a href="#"
-                        class="hover:text-blue-200 transition-colors py-2">{{ __('Foreign Language Books') }}</a>
-                    <a href="#" class="hover:text-blue-200 transition-colors py-2">{{ __('Promotions') }}</a>
+                    <a href="{{ url('/') }}" class="hover:text-blue-200 transition-colors py-2">
+                        {{ __('Home') }}
+                    </a>
+
+                    <a href="{{ route('home.index', ['tieu-thuyet' => 'novels']) }}"
+                        class="hover:text-blue-200 transition-colors py-2">
+                        {{ __('Novels') }}
+                    </a>
+
+                    <a href="{{ route('home.index', ['tre-em' => 'children']) }}"
+                        class="hover:text-blue-200 transition-colors py-2">
+                        {{ __('Children Books') }}
+                    </a>
+
+                    <a href="{{ route('home.index', ['tieu-su' => 'textbooks']) }}"
+                        class="hover:text-blue-200 transition-colors py-2">
+                        {{ __('Textbooks') }}
+                    </a>
+
+                    <a href="{{ route('home.index', ['category_slug' => 'foreign']) }}"
+                        class="hover:text-blue-200 transition-colors py-2">
+                        {{ __('Foreign Language Books') }}
+                    </a>
+
+                    <a href="{{ route('home.index', ['promotions' => 1]) }}"
+                        class="hover:text-blue-200 transition-colors py-2">
+                        {{ __('Promotions') }}
+                    </a>
                 </div>
             </div>
         </nav>

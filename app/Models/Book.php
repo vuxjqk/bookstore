@@ -127,6 +127,19 @@ class Book extends Model
             $q->whereIn('status', $filters['statuses'])
         );
 
+        $query->when(
+            $filters['category_slug'] ?? null,
+            fn($q, $slug) =>
+            $q->whereHas('categories', fn($qq) => $qq->where('slug', $slug))
+        );
+
+        $query->when(
+            $filters['promotions'] ?? null,
+            fn($q) =>
+            $q->whereNotNull('sale_price')
+                ->whereColumn('sale_price', '<', 'original_price')
+        );
+
         $query->when($filters['sort'] ?? null, function ($q) use ($filters) {
             if (array_key_exists($filters['sort'], self::SORT_OPTIONS)) {
                 [$column, $direction] = self::SORT_OPTIONS[$filters['sort']];
