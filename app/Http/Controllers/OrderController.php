@@ -244,7 +244,69 @@ class OrderController extends Controller
             'save_address' => 'nullable|boolean',
         ]);
 
-        // Tính tổng giá trị đơn hàng
+        // Tính tổng + xử lý mã giảm giá + kiểm tra tồn kho (gọi method chung)
+        $orderData = $this->prepareOrderData($validated, $cart);
+
+        if (is_a($orderData, \Illuminate\Http\RedirectResponse::class)) {
+            return $orderData; // lỗi từ validate mã giảm hoặc tồn kho
+        }
+
+        // Nếu là VNPay → lưu tạm + redirect sang cổng thanh toán
+        if ($validated['payment_method'] === 'vnpay') {
+            session()->put('pending_order', $orderData + [
+                'validated' => $validated,
+            ]);
+
+            return $this->redirectToVnpay($orderData['total_after_discount']);
+        }
+
+        // COD → tạo đơn luôn
+        return $this->createOrderConfirmed($orderData, $validated, 'pending', 'pending');
+    }
+
+    // Xử lý callback từ VNPay
+    public function vnpayCallback(Request $request)
+    {
+        $pending = session('pending_order');
+
+        if (!$pending) {
+            return redirect()->route('cart.index')->with('error', __('No pending order found.'));
+        }
+
+        if (!$this->verifyVnpaySignature($request)) {
+            session()->forget('pending_order');
+            return redirect()->route('cart.index')->with('error', __('Invalid payment signature.'));
+        }
+
+        if ($request->vnp_ResponseCode !== '00' || $request->vnp_TransactionStatus !== '00') {
+            session()->forget('pending_order');
+            return redirect()->route('cart.index')->with('error', __('Payment failed. Code: ') . $request->vnp_ResponseCode);
+        }
+
+        $amount = $request->vnp_Amount / 100;
+        if ($amount != $pending['total_after_discount']) {
+            session()->forget('pending_order');
+            return redirect()->route('cart.index')->with('error', __('Invalid payment amount.'));
+        }
+
+        // Thanh toán thành công → tạo đơn
+        $result = $this->createOrderConfirmed(
+            $pending,
+            $pending['validated'],
+            'confirmed',           // status đơn hàng
+            'completed',           // payment status
+            $request->vnp_TxnRef   // transaction_id
+        );
+
+        session()->forget(['cart', 'pending_order']);
+        return $result;
+    }
+
+    /**
+     * Chuẩn bị dữ liệu đơn hàng (tính tiền, kiểm tra mã giảm, tồn kho)
+     */
+    private function prepareOrderData($validated, $cart)
+    {
         $total = collect($cart)->sum('subtotal');
         $shippingFee = $total > 300000 ? 0 : 30000;
         $discount_amount = 0;
@@ -263,7 +325,7 @@ class OrderController extends Controller
             }
 
             if ($promotion->min_order_amount && $total < $promotion->min_order_amount) {
-                return redirect()->back()->with('error', __('Order amount does not meet the minimum requirement for this promotion.'));
+                return redirect()->back()->with('error', __('Order amount does not meet the minimum requirement.'));
             }
 
             $discount_amount = $total * ($promotion->discount_percentage / 100);
@@ -290,227 +352,120 @@ class OrderController extends Controller
 
         foreach ($cart as $bookId => $item) {
             $book = $books->get($bookId);
-            if ($book->stock_quantity < $item['quantity']) {
-                return redirect()->route('cart.index')->with('error', __("Insufficient stock quantity for {$book->title}!"));
+            if (!$book || $book->stock_quantity < $item['quantity']) {
+                return redirect()->route('cart.index')
+                    ->with('error', __("Insufficient stock for book: ") . ($book->title ?? 'Unknown'));
             }
         }
 
-        // Nếu chọn VNPay, lưu tạm dữ liệu vào session và chuyển hướng
-        if ($validated['payment_method'] === 'vnpay') {
-            session()->put('pending_order', [
-                'validated' => $validated,
-                'cart' => $cart,
-                'total_after_discount' => $total_after_discount,
-                'discount_amount' => $discount_amount,
-                'promotion_id' => $promotion->id ?? null,
-                'books' => $books->toArray(),
-            ]);
-
-            $vnp_TmnCode = config('services.vnpay.tmn_code');
-            $vnp_HashSecret = config('services.vnpay.hash_secret');
-            $vnp_Url = config('services.vnpay.url');
-            $vnp_ReturnUrl = config('services.vnpay.return_url');
-
-            $vnp_TxnRef = time() . '_' . uniqid();
-            $vnp_OrderInfo = "Thanh toan don hang #" . $vnp_TxnRef;
-            $vnp_OrderType = 'bookpayment';
-            $vnp_Amount = $total_after_discount * 100;
-            $vnp_Locale = 'vn';
-            $vnp_IpAddr = $request->ip();
-
-            $inputData = [
-                "vnp_Version" => "2.1.0",
-                "vnp_TmnCode" => $vnp_TmnCode,
-                "vnp_Amount" => $vnp_Amount,
-                "vnp_Command" => "pay",
-                "vnp_CreateDate" => now()->format('YmdHis'),
-                "vnp_CurrCode" => "VND",
-                "vnp_IpAddr" => $vnp_IpAddr,
-                "vnp_Locale" => $vnp_Locale,
-                "vnp_OrderInfo" => $vnp_OrderInfo,
-                "vnp_OrderType" => $vnp_OrderType,
-                "vnp_ReturnUrl" => $vnp_ReturnUrl,
-                "vnp_TxnRef" => $vnp_TxnRef,
-            ];
-
-            ksort($inputData);
-            $query = "";
-            $hashdata = "";
-            $i = 0;
-            foreach ($inputData as $key => $value) {
-                if ($i == 1) {
-                    $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
-                } else {
-                    $hashdata .= urlencode($key) . "=" . urlencode($value);
-                    $i = 1;
-                }
-                $query .= urlencode($key) . "=" . urlencode($value) . '&';
-            }
-
-            $vnp_SecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
-            $paymentUrl = $vnp_Url . "?" . $query . "vnp_SecureHash=" . $vnp_SecureHash;
-
-            return redirect()->away($paymentUrl);
-        }
-
-        // Nếu chọn COD, tạo đơn hàng ngay
-        try {
-            return DB::transaction(function () use ($validated, $cart, $total_after_discount, $discount_amount, $books, $promotion) {
-                /** @var \App\Models\User $user */
-                $user = Auth::user();
-
-                if ($user && ($validated['save_address'] ?? false)) {
-                    $user->update(['address' => $validated['shipping_address']]);
-                }
-
-                $order = Order::create([
-                    'user_id' => Auth::id(),
-                    'customer_name' => $validated['customer_name'],
-                    'customer_phone' => $validated['customer_phone'],
-                    'shipping_address' => $validated['shipping_address'],
-                    'order_date' => now(),
-                    'total_amount' => $total_after_discount,
-                    'promotion_id' => $promotion->id ?? null,
-                    'status' => 'pending',
-                ]);
-
-                foreach ($cart as $bookId => $item) {
-                    $order->items()->create([
-                        'book_id' => $bookId,
-                        'quantity' => $item['quantity'],
-                        'unit_price' => $item['unit_price'],
-                        'subtotal' => $item['subtotal'],
-                    ]);
-
-                    $book = $books->get($bookId);
-                    $book->decrement('stock_quantity', $item['quantity']);
-                }
-
-                $order->payment()->create([
-                    'payment_method' => $validated['payment_method'],
-                    'amount' => $total_after_discount,
-                    'payment_status' => 'pending',
-                    'paid_at' => null,
-                    'transaction_id' => null,
-                ]);
-
-                session()->forget('cart');
-
-                return redirect()->route('cart.success')->with('success', __('Order created successfully! Order ID: ' . $order->id));
-            });
-        } catch (Exception $e) {
-            return redirect()->back()->with('error', __('An error occurred while creating the order: ') . $e->getMessage());
-        }
+        return [
+            'cart' => $cart,
+            'books' => $books,
+            'total_after_discount' => $total_after_discount,
+            'discount_amount' => $discount_amount,
+            'promotion_id' => $promotion->id ?? null,
+            'shipping_fee' => $shippingFee,
+        ];
     }
 
-    public function vnpayCallback(Request $request)
+    /**
+     * Tạo đơn hàng đã được xác nhận (dùng chung cho COD & VNPay)
+     */
+    private function createOrderConfirmed($data, $validated, $orderStatus, $paymentStatus, $transactionId = null)
+    {
+        return DB::transaction(function () use ($data, $validated, $orderStatus, $paymentStatus, $transactionId) {
+            $user = Auth::user();
+
+            if ($user && ($validated['save_address'] ?? false)) {
+                $user->update(['address' => $validated['shipping_address']]);
+            }
+
+            $order = Order::create([
+                'user_id' => Auth::id(),
+                'customer_name' => $validated['customer_name'],
+                'customer_phone' => $validated['customer_phone'],
+                'shipping_address' => $validated['shipping_address'],
+                'order_date' => now(),
+                'total_amount' => $data['total_after_discount'],
+                'promotion_id' => $data['promotion_id'],
+                'status' => $orderStatus,
+            ]);
+
+            foreach ($data['cart'] as $bookId => $item) {
+                $order->items()->create([
+                    'book_id' => $bookId,
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $item['unit_price'],
+                    'subtotal' => $item['subtotal'],
+                ]);
+
+                $book = $data['books']->get($bookId);
+                $book->decrement('stock_quantity', $item['quantity']);
+            }
+
+            $order->payment()->create([
+                'payment_method' => $validated['payment_method'],
+                'amount' => $data['total_after_discount'],
+                'payment_status' => $paymentStatus,
+                'paid_at' => $paymentStatus === 'completed' ? now() : null,
+                'transaction_id' => $transactionId,
+            ]);
+
+            return redirect()->route('cart.success')
+                ->with('success', __('Order #' . $order->id . ' created successfully!'));
+        });
+    }
+
+    /**
+     * Redirect sang VNPay
+     */
+    private function redirectToVnpay($amount)
+    {
+        $vnp_TmnCode = config('services.vnpay.tmn_code');
+        $vnp_HashSecret = config('services.vnpay.hash_secret');
+        $vnp_Url = config('services.vnpay.url');
+        $vnp_ReturnUrl = config('services.vnpay.return_url');
+
+        $vnp_TxnRef = time() . '_' . uniqid();
+        $vnp_OrderInfo = "Thanh toan don hang #$vnp_TxnRef";
+
+        $inputData = [
+            "vnp_Version" => "2.1.0",
+            "vnp_TmnCode" => $vnp_TmnCode,
+            "vnp_Amount" => $amount * 100,
+            "vnp_Command" => "pay",
+            "vnp_CreateDate" => now()->format('YmdHis'),
+            "vnp_CurrCode" => "VND",
+            "vnp_IpAddr" => request()->ip(),
+            "vnp_Locale" => "vn",
+            "vnp_OrderInfo" => $vnp_OrderInfo,
+            "vnp_OrderType" => "bookpayment",
+            "vnp_ReturnUrl" => $vnp_ReturnUrl,
+            "vnp_TxnRef" => $vnp_TxnRef,
+        ];
+
+        ksort($inputData);
+        $hashdata = http_build_query($inputData, '', '&');
+        $vnp_SecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
+
+        $paymentUrl = $vnp_Url . "?" . $hashdata . "&vnp_SecureHash=" . $vnp_SecureHash;
+
+        return redirect()->away($paymentUrl);
+    }
+
+    /**
+     * Xác minh chữ ký VNPay
+     */
+    private function verifyVnpaySignature(Request $request): bool
     {
         $vnp_HashSecret = config('services.vnpay.hash_secret');
         $inputData = $request->all();
-        $vnp_SecureHash = $inputData['vnp_SecureHash'] ?? '';
-        unset($inputData['vnp_SecureHashType']);
-        unset($inputData['vnp_SecureHash']);
+        $secureHash = $inputData['vnp_SecureHash'] ?? '';
 
+        unset($inputData['vnp_SecureHash'], $inputData['vnp_SecureHashType']);
         ksort($inputData);
-        $hashdata = "";
-        $i = 0;
-        foreach ($inputData as $key => $value) {
-            if ($i == 1) {
-                $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
-            } else {
-                $hashdata .= urlencode($key) . "=" . urlencode($value);
-                $i = 1;
-            }
-        }
 
-        $secureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
-        $responseCode = $inputData['vnp_ResponseCode'] ?? null;
-        $transactionStatus = $inputData['vnp_TransactionStatus'] ?? null;
-        $amount = ($inputData['vnp_Amount'] ?? 0) / 100;
-        $vnp_TxnRef = $inputData['vnp_TxnRef'] ?? null;
-
-        // Lấy dữ liệu từ session
-        $pending_order = session('pending_order');
-
-        if (!$pending_order) {
-            return redirect()->route('cart.index')->with('error', __('No pending order found.'));
-        }
-
-        if ($secureHash === $vnp_SecureHash && $responseCode === '00' && $transactionStatus === '00') {
-            try {
-                return DB::transaction(function () use ($pending_order, $amount, $vnp_TxnRef) {
-                    $validated = $pending_order['validated'];
-                    $cart = $pending_order['cart'];
-                    $total_after_discount = $pending_order['total_after_discount'];
-                    $discount_amount = $pending_order['discount_amount'];
-                    $promotion_id = $pending_order['promotion_id'];
-                    $books = collect($pending_order['books'])->keyBy('id');
-
-                    // Kiểm tra lại tồn kho
-                    foreach ($cart as $bookId => $item) {
-                        $book = $books->get($bookId);
-                        if ($book['stock_quantity'] < $item['quantity']) {
-                            session()->forget('pending_order');
-                            return redirect()->route('cart.index')->with('error', __("Insufficient stock quantity for {$book['title']}!"));
-                        }
-                    }
-
-                    // Kiểm tra số tiền
-                    if ($total_after_discount != $amount) {
-                        session()->forget('pending_order');
-                        return redirect()->route('cart.index')->with('error', __('Invalid payment amount.'));
-                    }
-
-                    // Tạo đơn hàng
-                    /** @var \App\Models\User $user */
-                    $user = Auth::user();
-
-                    if ($user && $validated['save_address']) {
-                        $user->update(['address' => $validated['shipping_address']]);
-                    }
-
-                    $order = Order::create([
-                        'user_id' => Auth::id(),
-                        'name' => $validated['customer_name'],
-                        'phone' => $validated['customer_phone'],
-                        'shipping_address' => $validated['shipping_address'],
-                        'order_date' => now(),
-                        'total_amount' => $total_after_discount,
-                        'promotion_id' => $promotion_id,
-                        'status' => 'confirmed',
-                    ]);
-
-                    foreach ($cart as $bookId => $item) {
-                        $order->items()->create([
-                            'book_id' => $bookId,
-                            'quantity' => $item['quantity'],
-                            'unit_price' => $item['unit_price'],
-                            'subtotal' => $item['subtotal'],
-                        ]);
-
-                        $book = Book::find($bookId);
-                        $book->decrement('stock_quantity', $item['quantity']);
-                    }
-
-                    $order->payment()->create([
-                        'payment_method' => 'vnpay',
-                        'amount' => $total_after_discount,
-                        'payment_status' => 'completed',
-                        'paid_at' => now(),
-                        'transaction_id' => $vnp_TxnRef,
-                    ]);
-
-                    session()->forget(['cart', 'pending_order']);
-
-                    return redirect()->route('cart.success')->with('success', __('Payment for order #' . $order->id . ' successful!'));
-                });
-            } catch (Exception $e) {
-                session()->forget('pending_order');
-                return redirect()->route('cart.index')->with('error', __('An error occurred while creating the order: ') . $e->getMessage());
-            }
-        } else {
-            session()->forget('pending_order');
-            return redirect()->route('cart.index')->with('error', __('Payment failed or cancelled. Error code: ') . ($responseCode ?? 'N/A'));
-        }
+        $hashdata = http_build_query($inputData, '', '&');
+        return hash_hmac('sha512', $hashdata, $vnp_HashSecret) === $secureHash;
     }
 }
